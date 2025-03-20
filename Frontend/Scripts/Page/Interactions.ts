@@ -67,8 +67,12 @@ function WatchForAccountMenu(): void {
 const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEventBase | JQuery.ContextMenuEvent): Promise<void> => {
 
     if (Event.type == "contextmenu") { Event.preventDefault(); } // Prevent default context menu
+
+    // TODO: will need to determine target and if apt to show context menu
+
+    return; // early return for now
     
-    const SharedOptions: ContextMenuOption[] = [] // will need to get target, etc..
+    const SharedOptions: ContextMenuOption[] = []
 
     ShowContextMenu(Event, SharedOptions);
 
