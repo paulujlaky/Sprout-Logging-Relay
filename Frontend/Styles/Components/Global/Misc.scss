@@ -1,0 +1,129 @@
+// Inputs
+
+Input[type="text"], Input[type="password"], Input[type="email"] {
+    
+    @include Container;
+    @include GlassBackground;
+
+    color: $FontColor;
+    
+    border-radius: calc($BorderRadiusLarge / 1.25);
+
+    padding: calc($SpacingSmall * 1.5) $SpacingMedium;
+
+    font-size: $FontSizeSmall;
+    letter-spacing: 0.5px;
+
+}
+
+Input:focus {
+
+    outline: none;
+    
+    border: 1px solid rgb(72, 72, 72);
+
+}
+
+Input::placeholder {
+
+    color: $FontColorMuted;
+
+}
+
+Toggle {
+
+    @include Container;
+    @include GlassBackground;
+    @include FlexCenter;
+
+    aspect-ratio: 1/1;
+
+    padding: 5px;
+
+    height: fit-content;
+    width: fit-content;
+        
+    transition: background-color $TransitionTime;
+
+    border-radius: calc($BorderRadiusSmall * 1.5);
+
+    font-size: 16px;
+    color: $FontColor;
+
+    cursor: pointer;
+
+    &:hover {
+
+        background-color: rgba(255, 255, 255, 0.1);
+
+    }
+
+    ion-icon {
+
+        opacity: 0;
+
+    }
+
+}
+
+Toggle.Active {
+
+    background-color: rgba(255, 255, 255, 0.1);
+
+    ion-icon {
+
+        opacity: 1;
+
+    }
+
+}
+
+// Context Menu 
+
+.DashContextMenu {
+
+    @include Container;
+    @include GlassBackground;
+    @include FlexVertical;
+
+    position: absolute;
+    z-index: 100;
+
+    gap: calc($SpacingSmall * 0.75);
+
+    padding: calc($SpacingSmall * 1.25) calc($SpacingSmall * 1.5);
+
+    color: $FontColor;
+
+    .DashContextMenuItem {
+
+        @include FlexHorizontal;
+        justify-content: space-between;
+
+        min-width: 100%;
+
+        padding: $SpacingSmall;
+
+        gap: $SpacingLarge;
+
+        border-radius: calc($BorderRadiusLarge * 0.75);
+
+        transition: background-color $TransitionTime;
+
+        cursor: pointer;
+
+        &:hover {
+
+            background-color: $ElementColorLight;
+
+        }
+
+        ion-icon {
+
+            font-size: $FontSizeLarge;
+
+        }
+
+    }
+
+}

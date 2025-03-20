@@ -1,0 +1,260 @@
+{
+    "DashPage": {
+
+        "Method": "GET",
+        "URL": "/",
+
+        "RateLimitConfig": null
+
+    },
+
+    "NavigatedDashPage": {
+
+        "Method": "GET",
+        "URL": "/Dash/*Path",
+
+        "RateLimitConfig": null
+
+    },
+    
+    "GetFile": {
+
+        "Method": "GET",
+        "URL": "/Files/*File",
+
+        "Authorized": false
+
+    },
+
+    "APIBase": {
+
+        "Method": "GET",
+        "URL": "/API/",
+
+        "RateLimitConfig": null
+
+    },
+
+    "GetFileList": {    
+
+        "Method": "GET",
+        "URL": "/API/Files/*Path",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow":         60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "NewFile": {
+
+        "Method": "POST",
+        "URL": "/API/Files/New",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "RenameFile": {
+
+        "Method": "PATCH",
+        "URL": "/API/Files/Rename",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "UpdateFileAccess": {
+
+        "Method": "PATCH",
+        "URL": "/API/Files/Access",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "GetFileQR": {
+
+        "Method": "POST",
+        "URL": "/API/Files/QR/",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "MoveFile": {
+
+        "Method": "PATCH",
+        "URL": "/API/Files/Move",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow":         60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "DeleteFile": {
+
+        "Method": "DELETE",
+        "URL": "/API/Files/Delete",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow":         60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "NewDir": {
+
+        "Method": "POST",
+        "URL": "/API/Dirs/New",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow":         60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "RenameDir": {
+
+        "Method": "PATCH",
+        "URL": "/API/Dirs/Rename",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "MoveDir": {
+
+        "Method": "PATCH",
+        "URL": "/API/Dirs/Move",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "UpdateDirAccess": {
+
+        "Method": "PATCH",
+        "URL": "/API/Dirs/Access",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "DeleteDir": {
+
+        "Method": "DELETE",
+        "URL": "/API/Dirs/Delete",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 60,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "Authorize": {
+        
+        "Method": "POST",
+        "URL": "/API/Misc/Auth",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        }
+
+    },
+
+    "LogOut": {
+
+        "Method": "POST",
+        "URL": "/API/Misc/LogOut",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    }
+
+}

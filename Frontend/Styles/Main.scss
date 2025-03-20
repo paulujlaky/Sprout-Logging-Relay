@@ -1,0 +1,119 @@
+// Variables 
+
+$BackgroundColor: rgb(10, 10, 10);
+
+$ElementColorDark: rgb(20, 20, 20);
+$ElementColorMedium: rgb(35, 35, 35);
+$ElementColorLight: rgb(50, 50, 50);
+$ElementColorLightest: rgb(52, 52, 52);
+
+$FontSizeLargest: 1.5rem;
+$FontSizeLarge: 1.25rem;
+$FontSizeMedium: 1rem;
+$FontSizeSmall: 0.85rem;
+
+$FontWeightBold: 700;
+$FontWeightSemiBold: 600;
+$FontWeightMedium: 500;
+
+$Border: 1px solid $ElementColorLight;
+
+$FontColor: rgb(240, 240, 240);
+$FontColorMuted: rgb(204, 204, 204);
+
+$BorderRadiusLarge: 12px;
+$BorderRadiusSmall: 5px;
+
+$SpacingLarge: 1.5rem;
+$SpacingMedium: 1rem;
+$SpacingSmall: 0.5rem;
+
+$TransitionTime: 0.1s;
+
+@import "Mixins.scss";
+
+// Reusable Components 
+
+@import "Components/Reusable/Containers.scss";
+
+// Main Components
+
+// Other UIs / Components
+
+@import "Components/Global/Buttons.scss";
+@import "Components/Global/Header.scss";
+@import "Components/Global/Main.scss";
+@import "Components/Global/Dialog.scss";
+@import "Components/Global/Misc.scss";
+
+// Global 
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+// Body 
+
+body {
+
+    font-family: "din-2014", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+
+    background-color: $BackgroundColor;
+    color: $FontColor;
+
+    margin: 0;
+    padding: 0;
+
+}
+
+// Loading View
+
+.Container.DashLoading, .Container.DashUploadDropIndicator {
+
+    position: absolute;
+    top: 0; left: 0;
+
+    @include FlexCenter();
+
+    z-index: 10;
+
+    background-color: $BackgroundColor!important;
+    
+}
+
+.DashNoAccessMessage {
+
+    font-size: $FontSizeMedium;
+    margin-top: calc($SpacingLarge * 2);
+
+    text-align: center;
+
+}
+
+.Container.DashHeaderBranding.DashLoadingVariant {
+    
+    animation: ExpandAndFadeIn 0.5s ease-in-out forwards;
+
+}
+
+@keyframes ExpandAndFadeIn {
+
+    0% {
+
+        transform: scale(1);
+        opacity: 0;
+
+    }
+
+    100% {
+
+        transform: scale(2);
+        opacity: 1;
+
+    }
+
+}

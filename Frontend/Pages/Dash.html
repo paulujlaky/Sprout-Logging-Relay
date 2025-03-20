@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <title>Sprout Logging Relay</title>
+  <link rel="icon" href="/Assets/Logos/Sprout.ico" type="image/x-icon">
+
+  <!-- Embeds -->
+
+  <meta name="description" content="The Sprout Logging relay is an internal tool for Sprout developers to view and manage logs from various Sprout services.">
+
+  <!-- Open Graph -->
+
+  <meta property="og:title" content="Sprout Logging Relay">
+  <meta property="og:description" content="The Sprout Logging relay is an internal tool for Sprout developers to view and manage logs from various Sprout services.">
+  <meta property="og:image" content="/Assets/Logos/Sprout.png">
+
+  <!-- Twitter Card (Thumbnail) -->
+
+  <meta name="twitter:title" content="Sprout Logging Relay">
+  <meta name="twitter:description" content="The Sprout Logging relay is an internal tool for Sprout developers to view and manage logs from various Sprout services.">
+  
+  <!-- Styles & Scripts -->
+  
+  <link rel="stylesheet" href="/Out/Styles/Main.min.css">
+  <script type="module" src="/Out/Scripts/Main.js"></script> <!-- also minified -->
+
+  <!-- External Libraries -->
+
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  
+  <link rel="stylesheet" href="https://use.typekit.net/pge8obf.css">
+
+</head>
+
+<body>
+
+  <div class="Container Transparent Full Center DashLoading">
+
+    <div class="Container Transparent VerticalFlex DashLoadingContainer">
+
+      <div class="Container HorizontalFlex DashHeaderBranding DashLoadingVariant">
+
+        <img src="/Assets/Logos/Sprout.svg" alt="Sprout" class="DashHeaderImage" draggable="false">
+
+        <div class="DashHeaderTitle">Logging Relay</div>
+
+      </div>
+
+      <div class="DashNoAccessMessage" style="display: none;">You do not have access to the Sprout Logging Relay</div>
+
+    </div>
+
+  </div>
+
+  <header class="Container Glass DashHeader">
+
+    <div class="Container HorizontalFlex DashHeaderBranding">
+
+      <img src="/Assets/Logos/Sprout.svg" alt="Sprout" class="DashHeaderImage" draggable="false">
+
+      <div class="DashHeaderTitle">Logging Relay</div>
+
+    </div>
+
+    <div class="Container VerticalFlex DashHeaderMessage">
+
+
+      
+    </div>
+
+    <div class="Container HorizontalFlex DashHeaderAccount">
+
+      <ion-icon name="person-circle" class="DashHeaderAccountIcon"></ion-icon>
+      
+    </div> 
+
+  </header>
+
+  <main class="DashMain">
+
+
+  </main>
+
+  <footer class="Container Glass DashFooter">
+
+    <div class="Container Transparent HorizontalFlex DashFooterButtonSection">
+
+
+    </div>
+
+    <div class="Container Transparent HorizontalFlex DashFooterMessageSection">
+
+        <div class="Container Transparent Center DashFooterMessageLoadingIndicator">
+
+          <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></path></svg>
+        
+        </div>
+
+        <div class="Container Transparent Center DashFooterMessageIcon">
+          
+        </div>
+
+        <div class="DashFooterMessageText">Loading...</div>
+
+    </div>
+
+    <div class="Container Transparent HorizontalFlex DashFooterButtonSection">
+
+      <Button class="DashFooterButton NewFile">
+        
+        <ion-icon name="document"></ion-icon>
+
+        <span class="DashFooterButtonText">New File</span>
+      
+      </Button>
+
+      <Button class="DashFooterButton NewFolder">
+
+        <ion-icon name="folder"></ion-icon>
+
+        <span class="DashFooterButtonText">New Folder</span>
+        
+      </Button>
+
+    </div>
+
+  </footer>
+
+  <!-- Context Menu -->
+
+  <div class="DashContextMenu" style="display: none;">
+
+  </div>
+
+  <!-- Dialogs -->
+
+  <div class="DashDialogOverlay" style="display: none;"></div>
+
+  <!-- View Account Dialog -->
+
+  <dialog class="Container VerticalFlex DashDialog DashViewAccountDialog" style="display: none;">
+
+    <div class="Container Transparent HorizontalFlex DashDialogHeader">
+
+      <div class="DashDialogTitle">Sprout Account</div>
+
+    </div>
+
+    <div class="Container Transparent HorizontalFlex DashDialogBody AccountView">
+
+      <div class="Container Transparent Center DashDialogAccountIcon">
+
+        <ion-icon name="person-circle" class="DashDialogAccountIcon"></ion-icon>
+
+      </div>
+
+      <div class="Container Transparent VerticalFlex DashDialogAccountInfo" style="align-items: start;">
+
+          <div class="DashDialogAccountInfoItem DashHeaderMessageUser">Username</div>
+          <div class="DashDialogAccountInfoItem DashHeaderMessageEmail">Email</div>
+
+      </div>
+
+    </div>
+
+    <div class="Container Transparent HorizontalFlex DashDialogFooter">
+
+      <Button class="DashDialogButton DashDialogButtonCancel">Close</Button>
+      <Button class="DashDialogButton DashDialogButtonCancel" id="LogOut">Log Out</Button>
+
+    </div>
+
+  </dialog>
+  
+</body>
+
+</html>

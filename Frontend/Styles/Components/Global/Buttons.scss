@@ -1,0 +1,41 @@
+Button {
+
+    font: inherit;
+    font-size: $FontSizeMedium;
+
+    color: $FontColor;
+
+    @include Container();
+    @include FlexCenter();
+
+    gap: $SpacingSmall;
+
+    padding: $SpacingSmall $SpacingMedium;
+
+    @include GlassBackground($ElementColorLight);
+
+    cursor: pointer;
+
+    transition: background-color $TransitionTime;
+
+    border-radius: calc($BorderRadiusLarge / 1.5);
+    
+}
+
+Button:hover {
+
+    background-color: $ElementColorLightest;
+
+}
+
+Button:not([disabled]):active {
+
+    transform: scale(0.95);
+
+}
+
+Button[disabled] {
+
+    cursor: not-allowed;
+
+}
