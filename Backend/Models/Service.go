@@ -12,7 +12,7 @@ type Service struct {
 	
 }
 
-func (AssociatedService *Service) AddLog(Level int, Title string, RawContent string) {
+func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) {
 
 	AssociatedService.Logs = append(AssociatedService.Logs, Log{
 
