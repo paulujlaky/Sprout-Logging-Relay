@@ -7,6 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
 	"elucid503/SproutLoggingRelay/Assets"
 
 	"elucid503/SproutLoggingRelay/Middleware"
@@ -14,6 +17,7 @@ import (
 )
 
 var ConfigFilePath string = "./Assets/Config.json"
+var DbClient *mongo.Client
 
 func LoadConfig() (*Types.Config, error) {
 
@@ -42,6 +46,26 @@ func LoadConfig() (*Types.Config, error) {
 	}
 
 	return Config, nil
+
+}
+
+func ConnectToDb(Config *Types.Config) error {
+
+	ClientOptions := options.Client().ApplyURI(Config.Database.URI)
+
+	Client, Err := mongo.Connect(nil, ClientOptions)
+
+	if Err != nil {
+
+		return Err
+
+	}
+
+	// Assign the client to the global variable
+
+	DbClient = Client
+
+	return nil
 
 }
 
@@ -92,6 +116,18 @@ func main() {
 	LoadRoutes(GinRouter)
 
 	fmt.Printf("Loaded %d routes...\n", len(RouteHandlers))
+
+	// Connect to the database
+
+	DbError := ConnectToDb(Config)
+
+	if DbError != nil {
+
+		panic(DbError) // Can't continue
+
+	}
+
+	fmt.Println("Connected to the database...")
 
 	fmt.Printf("Listening on port %d...\n", Config.Server.Port)
 
