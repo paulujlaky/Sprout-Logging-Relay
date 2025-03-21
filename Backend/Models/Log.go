@@ -1,5 +1,17 @@
 package Models
 
+type LogLevel int
+
+const (
+
+	// Log Levels
+
+	LogLevelInfo = 0
+	LogLevelWarning = 1
+	LogLevelError = 2
+
+)
+
 type LogFeature struct {
 
 	// May represent code blocks, links, or anything else the parser may need to identify
@@ -21,7 +33,7 @@ type LogContent struct {
 
 type Log struct {
 	
-	Level int `json:"Level"`
+	Level 
 
 	Content LogContent `json:"Content"`
 
