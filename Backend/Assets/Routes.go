@@ -1,18 +1,24 @@
 package Assets
 
 import (
+
 	"elucid503/SproutLoggingRelay/Middleware"
 
 	// Route Imports from ./Routes
 
 	GlobalRoutes "elucid503/SproutLoggingRelay/Routes"
 	APIRoutes "elucid503/SproutLoggingRelay/Routes/API"
-	MiscRoutes "elucid503/SproutLoggingRelay/Routes/API/Misc"
+	AuthRoutes "elucid503/SproutLoggingRelay/Routes/API/Auth"
+
+	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Logs"
+	ServiceRoutes "elucid503/SproutLoggingRelay/Routes/API/Services"
 
 	"github.com/gin-gonic/gin"
+	
 )
 
 type RouteInfo struct {
+
 	Method  string
 	Handler func(*gin.Context)
 
@@ -20,6 +26,7 @@ type RouteInfo struct {
 
 	RateLimitConfig *Middleware.RouteRateLimitConfig
 	Authorized      bool
+
 }
 
 func GetRoutes() map[string]RouteInfo {
@@ -42,10 +49,10 @@ func GetRoutes() map[string]RouteInfo {
 			RateLimitConfig: nil,
 		},
 
-		"/API/Misc/Auth": {
+		"/API/Auth/LogIn": {
 
 			Method:  "POST",
-			Handler: MiscRoutes.Authorize,
+			Handler: AuthRoutes.LogIn,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
@@ -54,10 +61,10 @@ func GetRoutes() map[string]RouteInfo {
 			},
 		},
 
-		"/API/Misc/LogOut": {
+		"/API/Auth/LogOut": {
 
 			Method:  "POST",
-			Handler: MiscRoutes.LogOut,
+			Handler: AuthRoutes.LogOut,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
@@ -65,6 +72,91 @@ func GetRoutes() map[string]RouteInfo {
 				TimeWindow:         60,
 			},
 		},
+
+		// General Log Routes 
+
+		"/API/Logs/Create": {
+
+			Method:  "POST",
+			Handler: LogRoutes.CreateLog,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 120,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: false, // services must be able to call this route programmatically
+
+		},
+
+		"/API/Logs/View": {
+
+			Method:  "GET",
+			Handler: LogRoutes.ViewLogs,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 180,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
+		"/API/Logs/Watch": {
+
+			Method:  "GET", // WebSocket Route
+			Handler: LogRoutes.WatchLogs,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 90,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
+		// Services
+		
+		"/API/Services/Create": {
+
+			Method:  "POST",
+			Handler: ServiceRoutes.CreateService,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 90,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
+		"/API/Services/List": {
+
+			Method:  "GET",
+			Handler: ServiceRoutes.GetServiceList,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 180,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
 	}
 
 }

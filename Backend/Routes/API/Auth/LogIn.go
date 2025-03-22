@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Authorize(GinContext *gin.Context) {
+func LogIn(GinContext *gin.Context) {
 
 	// Get request body
 

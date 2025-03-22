@@ -7,17 +7,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
-
 	"elucid503/SproutLoggingRelay/Assets"
+	"elucid503/SproutLoggingRelay/Misc"
 
 	"elucid503/SproutLoggingRelay/Middleware"
 	"elucid503/SproutLoggingRelay/Types"
 )
 
 var ConfigFilePath string = "./Assets/Config.json"
-var DbClient *mongo.Client
 
 func LoadConfig() (*Types.Config, error) {
 
@@ -46,26 +43,6 @@ func LoadConfig() (*Types.Config, error) {
 	}
 
 	return Config, nil
-
-}
-
-func ConnectToDb(Config *Types.Config) error {
-
-	ClientOptions := options.Client().ApplyURI(Config.Database.URI)
-
-	Client, Err := mongo.Connect(nil, ClientOptions)
-
-	if Err != nil {
-
-		return Err
-
-	}
-
-	// Assign the client to the global variable
-
-	DbClient = Client
-
-	return nil
 
 }
 
@@ -119,7 +96,7 @@ func main() {
 
 	// Connect to the database
 
-	DbError := ConnectToDb(Config)
+	DbError := Misc.ConnectToDb(Config)
 
 	if DbError != nil {
 
