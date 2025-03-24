@@ -5,7 +5,10 @@ import (
 	"strings"
 	"time"
 
+	"elucid503/SproutLoggingRelay/Functions"
 	"elucid503/SproutLoggingRelay/Misc"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Service struct {
@@ -18,11 +21,19 @@ type Service struct {
 
 	Logs []Log `json:"Logs"`
 
+	// Internals 
+
+	MaxLogs int `json:"MaxLogs"` // max logs to keep before overwriting
+
 }
 
 // Creator 
 
-func NewService(UID string, Name string, Description string, Icon string) Service {
+func NewService(Name string, Description string, Icon string) Service {
+
+	// Generate UID
+
+	UID := Functions.RandomString(16)
 
 	Service := Service{
 
@@ -33,6 +44,8 @@ func NewService(UID string, Name string, Description string, Icon string) Servic
 
 		Logs:        []Log{},
 
+		MaxLogs:     500, // default max logs to keep before overwriting. eventually might be configurable by user
+
 	}
 	
 	Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").InsertOne(context.TODO(), Service)
@@ -41,13 +54,33 @@ func NewService(UID string, Name string, Description string, Icon string) Servic
 
 }
 
+func ListServices() ([]Service, error) {
+
+	var Services []Service = []Service{}
+
+	DBCursor, Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").Find(context.TODO(), gin.H{}) // finds all entries
+
+	if Err != nil {
+
+		return nil, Err
+		
+	}
+
+	DBCursor.All(context.TODO(), &Services) // unmarshal all entries into Services slice
+		
+	DBCursor.Close(context.TODO()) // after reading, free memory
+	
+	return Services, nil
+	
+}
+
 // Getter (From DB)
 
 func GetServiceByUID(UID string) (*Service, error) {
 
 	var ServiceData Service
 
-	Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").FindOne(context.TODO(), Service{UID: UID}).Decode(&ServiceData)
+	Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").FindOne(context.TODO(), gin.H{"uid": UID}).Decode(&ServiceData)
 
 	if Err != nil {
 
@@ -61,7 +94,7 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 // Internal Funcs
 
-func (AssociatedService *Service) parseRawContent(RawContent string) []LogFeature {
+func (AssociatedService *Service) parseRawLogContent(RawContent string) []LogFeature {
 
 	// features will be denoted by {{feature_type:feature_value}}
 
@@ -103,7 +136,15 @@ func (AssociatedService *Service) parseRawContent(RawContent string) []LogFeatur
 
 // Public Funcs
 
-func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) {
+func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) error {
+	
+	if (AssociatedService.MaxLogs < len(AssociatedService.Logs)) {
+
+		// we need to remove the oldest log
+
+		AssociatedService.Logs = AssociatedService.Logs[1:] // reassign slice to everything except the first element
+
+	}
 
 	AssociatedService.Logs = append(AssociatedService.Logs, Log{
 
@@ -113,7 +154,7 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 			Title:       Title,
 			Description: RawContent,
-			Features:    AssociatedService.parseRawContent(RawContent),
+			Features:    AssociatedService.parseRawLogContent(RawContent),
 		},
 
 		Created: time.Now().Unix(),
@@ -121,6 +162,8 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	// Update in DB 
 
-	Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").UpdateOne(context.TODO(), Service{UID: AssociatedService.UID}, AssociatedService)
+	_, WriteError := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
+
+	return WriteError
 
 }

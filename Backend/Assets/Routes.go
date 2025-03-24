@@ -1,7 +1,6 @@
 package Assets
 
 import (
-
 	"elucid503/SproutLoggingRelay/Middleware"
 
 	// Route Imports from ./Routes
@@ -10,11 +9,10 @@ import (
 	APIRoutes "elucid503/SproutLoggingRelay/Routes/API"
 	AuthRoutes "elucid503/SproutLoggingRelay/Routes/API/Auth"
 
-	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Logs"
 	ServiceRoutes "elucid503/SproutLoggingRelay/Routes/API/Services"
+	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Services/Logs"
 
 	"github.com/gin-gonic/gin"
-	
 )
 
 type RouteInfo struct {
@@ -75,7 +73,7 @@ func GetRoutes() map[string]RouteInfo {
 
 		// General Log Routes 
 
-		"/API/Logs/Create": {
+		"/API/Services/:ServiceUID/Logs/Create": {
 
 			Method:  "POST",
 			Handler: LogRoutes.CreateLog,
@@ -91,7 +89,7 @@ func GetRoutes() map[string]RouteInfo {
 
 		},
 
-		"/API/Logs/View": {
+		"/API/Services/:ServiceUID/Logs/View": {
 
 			Method:  "GET",
 			Handler: LogRoutes.ViewLogs,
@@ -107,7 +105,7 @@ func GetRoutes() map[string]RouteInfo {
 
 		},
 
-		"/API/Logs/Watch": {
+		"/API/Services/:ServiceUID/Logs/Watch": {
 
 			Method:  "GET", // WebSocket Route
 			Handler: LogRoutes.WatchLogs,

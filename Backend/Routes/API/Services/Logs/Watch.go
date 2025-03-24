@@ -6,10 +6,6 @@ import (
 
 func WatchLogs(GinContext *gin.Context) {
 
-	// Get request body
-
-	Body := gin.H{}
-
-	GinContext.BindJSON(&Body)
-
+	// This will be a WebSocket route. TODO: implement.
+	
 }

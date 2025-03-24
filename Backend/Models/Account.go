@@ -41,14 +41,19 @@ func (Account SproutAccount) FromJSON(JSONData *map[string]interface{}) SproutAc
 
 	// JSON is already in the correct format, so we just need to cast it to the correct types
 
-	return SproutAccount{
+	Data := (*JSONData)["Data"].(map[string]interface{})["Account"].(map[string]interface{})
 
-		UID:      (*JSONData)["UID"].(string),
-		Username: (*JSONData)["Username"].(string),
-		Email:    (*JSONData)["Email"].(string),
-		Avatar:   (*JSONData)["Avatar"].(string),
-		Flags:    (*JSONData)["Flags"].([]any),
-	}
+	Account.UID = Data["UID"].(string)
+
+	Account.Username = Data["Username"].(string)
+
+	Account.Email = Data["Email"].(string)
+
+	Account.Avatar = Data["Avatar"].(string)
+
+	Account.Flags = Data["Flags"].([]interface{})
+
+	return Account
 
 }
 

@@ -9,7 +9,9 @@ import (
 // HTTP Requests
 
 type RequestOptions struct {
+
 	Headers map[string]string
+
 }
 
 var HTTPClient = &http.Client{}
