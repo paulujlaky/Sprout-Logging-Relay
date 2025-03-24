@@ -9,6 +9,7 @@ import (
 	"elucid503/SproutLoggingRelay/Misc"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Service struct {
@@ -58,18 +59,20 @@ func ListServices() ([]Service, error) {
 
 	var Services []Service = []Service{}
 
-	DBCursor, Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").Find(context.TODO(), gin.H{}) // finds all entries
+	Options := options.Find().SetProjection(gin.H{"logs": 0}) // exclude logs from the response since it would be too large and not make sense in this context
+	
+	DBCursor, Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
 
 	if Err != nil {
 
 		return nil, Err
-		
+
 	}
 
 	DBCursor.All(context.TODO(), &Services) // unmarshal all entries into Services slice
-		
+
 	DBCursor.Close(context.TODO()) // after reading, free memory
-	
+
 	return Services, nil
 	
 }
