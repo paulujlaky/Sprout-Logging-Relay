@@ -37,9 +37,9 @@ interface BackendResponse {
 
 }
 
-export async function MakeRequest(Route: { URL: string, Method: string }, Body?: any, Headers: { [key: string]: string } = {}, Params: { [key: string]: string } = {}, IsFormData: boolean = false): Promise<BackendResponse | null> {
+export async function MakeRequest(Route: { Path: string, Method: string }, Body?: any, Headers: { [key: string]: string } = {}, Params: { [key: string]: string } = {}, IsFormData: boolean = false): Promise<BackendResponse | null> {
 
-    let RouteURL = Route.URL;
+    let RouteURL = Route.Path;
 
     const Options: RequestInit = {
 
@@ -58,7 +58,7 @@ export async function MakeRequest(Route: { URL: string, Method: string }, Body?:
 
     for (const Param in Params) {
 
-        RouteURL = Route.URL.replace(`:${Param}`, Params[Param]).replace(`*${Param}`, encodeURIComponent(Params[Param]));
+        RouteURL = Route.Path.replace(`:${Param}`, Params[Param]).replace(`*${Param}`, encodeURIComponent(Params[Param]));
 
     }
 

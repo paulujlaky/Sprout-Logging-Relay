@@ -1,8 +1,17 @@
 {
-    "DashPage": {
+    "Base": {
 
         "Method": "GET",
-        "URL": "/",
+        "Path": "/",
+
+        "RateLimitConfig": null
+
+    },
+
+    "APIBase": {
+
+        "Method": "GET",
+        "Path": "/API/",
 
         "RateLimitConfig": null
 
@@ -11,11 +20,38 @@
     "LogIn": {
 
         "Method": "POST",
-        "URL": "/API/Auth/LogIn",
+        "Path": "/API/Auth/LogIn",
+        
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        }
+    },
+
+    "LogOut": {
+
+        "Method": "POST",
+        "Path": "/API/Auth/LogOut",
 
         "RateLimitConfig": {
 
             "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        }
+
+    },
+
+    "CreateLog": {
+
+        "Method": "POST",
+        "Path": "/API/Services/:ServiceUID/Logs/Create",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
             "TimeWindow": 60
 
         },
@@ -24,14 +60,62 @@
 
     },
 
-    "LogOut": {
+    "ViewServiceLogs": {
 
-        "Method": "POST",
-        "URL": "/API/Auth/LogOut",
+        "Method": "GET",
+        "Path": "/API/Services/:ServiceUID/Logs/View",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 180,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "WatchServiceLogs": {
+
+        "Method": "GET",
+        "Path": "/API/Services/:ServiceUID/Logs/Watch",
 
         "RateLimitConfig": {
 
             "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "CreateService": {
+
+        "Method": "POST",
+        "Path": "/API/Services/Create",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 90,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "ListServices": {
+
+        "Method": "GET",
+        "Path": "/API/Services/List",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 180,
             "TimeWindow": 60
 
         },

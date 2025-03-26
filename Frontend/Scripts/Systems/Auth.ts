@@ -15,7 +15,7 @@ export async function Authorize(): Promise<boolean> {
 
     // Assume token is either here, or in cookies. Either way, we must POST to API/Auth to see
 
-    const Response = await MakeRequest(Routes.Authorize, { Token: Token ? Token : null });
+    const Response = await MakeRequest(Routes.LogIn, { Token: Token ? Token : null });
 
     if (Response?.JSON?.UID) {
 
