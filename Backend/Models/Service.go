@@ -2,7 +2,6 @@ package Models
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"elucid503/SproutLoggingRelay/Functions"
@@ -97,46 +96,6 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 // Internal Funcs
 
-func (AssociatedService *Service) parseRawLogContent(RawContent string) []LogFeature {
-
-	// features will be denoted by {{feature_type:feature_value}}
-
-	var ParsedFeatures []LogFeature = []LogFeature{}
-
-	// these will be updated throughout
-
-	SplitString := strings.Split(RawContent, "{{")
-
-	for _, Split := range SplitString {
-
-		if strings.Contains(Split, "}}") {
-
-			// we have a feature, now we just need to parse it
-
-			FeatureSplit := strings.Split(Split, "}}")
-
-			FeatureTypeValue := strings.Split(FeatureSplit[0], ":")
-
-			if len(FeatureTypeValue) == 2 && IsValidFeatureType(FeatureTypeValue[0]) {
-
-				Feature := LogFeature{
-
-					Type:  LogFeatureType(FeatureTypeValue[0]),
-					Value: FeatureTypeValue[1],
-				}
-
-				ParsedFeatures = append(ParsedFeatures, Feature)
-
-			}
-
-		}
-
-	}
-
-	return ParsedFeatures
-
-}
-
 // Public Funcs
 
 func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) error {
@@ -149,7 +108,7 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	}
 
-	AssociatedService.Logs = append(AssociatedService.Logs, Log{
+	NewLog := Log{
 
 		Level: Level,
 
@@ -157,11 +116,15 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 			Title:       Title,
 			Description: RawContent,
-			Features:    AssociatedService.parseRawLogContent(RawContent),
 		},
 
 		Created: time.Now().Unix(),
-	})
+
+	}
+
+	NewLog.Content.Features = NewLog.parseRawLogContent() // parse the raw log content into features
+
+	AssociatedService.Logs = append(AssociatedService.Logs, NewLog) 
 
 	// Update in DB 
 

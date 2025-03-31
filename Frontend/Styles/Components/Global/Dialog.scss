@@ -97,15 +97,15 @@ Dialog {
 
 }
 
-.DashDialogAccountInfoItem.DashHeaderMessageUser {
+.DashDialogAccountInfoItem.DashHeaderMessageUser, .DashDialogAccountInfoItem.DashHeaderMessageEmail {
 
     font-size: $FontSizeMedium;
 
 }
 
-.DashHeaderMessageEmail {
+.DashDialogAccountInfoItem.DashHeaderMessageEmail {
 
-    font-size: $FontSizeSmall;
+   color: $FontColorMuted;
 
 }
 
