@@ -98,7 +98,7 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 // Public Funcs
 
-func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) error {
+func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) (error, *Log) {
 	
 	if (AssociatedService.MaxLogs < len(AssociatedService.Logs)) {
 
@@ -130,6 +130,6 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	_, WriteError := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
 
-	return WriteError
+	return WriteError, &NewLog
 
 }

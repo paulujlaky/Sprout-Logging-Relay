@@ -1,6 +1,7 @@
 package Routes
 
 import (
+	"elucid503/SproutLoggingRelay/Functions"
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
 	"fmt"
@@ -48,7 +49,7 @@ func ViewLogs(GinContext *gin.Context) {
 
 	GinContext.JSON(200, Types.Response{
 
-		Message: fmt.Sprintf("Retrieved %d logs", len(Logs)),
+		Message: fmt.Sprintf("Retrieved %d %s", len(Logs), Functions.PluralizeString(len(Logs), "log")),
 
 		JSON: Logs,
 

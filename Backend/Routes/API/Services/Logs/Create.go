@@ -1,6 +1,7 @@
 package Routes
 
 import (
+	"elucid503/SproutLoggingRelay/Misc"
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
 	"fmt"
@@ -98,7 +99,7 @@ func CreateLog(GinContext *gin.Context) {
 
 	// Create log
 
-	AddLogError := Service.AddLog(Models.LogLevel(ParsedLevel), Title, Content)
+	AddLogError, NewLog := Service.AddLog(Models.LogLevel(ParsedLevel), Title, Content)
 	
 	if AddLogError != nil {
 
@@ -108,14 +109,23 @@ func CreateLog(GinContext *gin.Context) {
 
 		})
 
-		return
-
 	} else {
 
 		GinContext.JSON(200, Types.Response{
 
 			Message: "Log added successfully",
 
+		})
+		
+		// In this case, we also should send to all websockets waiting for logs that this log was created 
+		
+		Misc.SendToAllWebSockets(Types.Response{
+			
+			Message: "New log created",
+			JSON: gin.H{
+				"ServiceUID": Service.UID,
+				"Log": NewLog,
+			},
 		})
 
 	}

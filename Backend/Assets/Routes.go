@@ -85,7 +85,7 @@ func GetRoutes() map[string]RouteInfo {
 
 			},
 
-			Authorized: false, // services must be able to call this route programmatically
+			Authorized:false, // services must be able to call this route programmatically
 
 		},
 
@@ -104,23 +104,7 @@ func GetRoutes() map[string]RouteInfo {
 			Authorized: true,
 
 		},
-
-		"/API/Services/:ServiceUID/Logs/Watch": {
-
-			Method:  "GET", // WebSocket Route
-			Handler: LogRoutes.WatchLogs,
-
-			RateLimitConfig: &Middleware.RouteRateLimitConfig{
-
-				MaxRequestsAllowed: 90,
-				TimeWindow:         60,
-
-			},
-
-			Authorized: true,
-
-		},
-
+		
 		// Services
 		
 		"/API/Services/Create": {
@@ -147,6 +131,22 @@ func GetRoutes() map[string]RouteInfo {
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
 				MaxRequestsAllowed: 180,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+		
+		"/API/Services/Watch": {
+
+			Method:  "GET",
+			Handler: ServiceRoutes.WatchServices,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 90,
 				TimeWindow:         60,
 
 			},
