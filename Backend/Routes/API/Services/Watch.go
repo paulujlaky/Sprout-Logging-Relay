@@ -3,7 +3,6 @@ package Routes
 import (
 	"elucid503/SproutLoggingRelay/Misc"
 	"elucid503/SproutLoggingRelay/Types"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -31,7 +30,7 @@ func WatchServices(GinContext *gin.Context) {
 
 		GinContext.JSON(500, Types.Response{
 
-			Message: "Failed to upgrade Connection",
+			Message: "Failed to upgrade connection",
 			JSON:    nil,
 		})
 
@@ -52,9 +51,7 @@ func WatchServices(GinContext *gin.Context) {
 	// Ping/Pong Handling 
 	
 	Conn.SetPongHandler(func(appData string) error {
-		
-		fmt.Println("[DEBUG] WebSocket pong received")
-		
+				
 		Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 		
 		return nil
@@ -62,16 +59,14 @@ func WatchServices(GinContext *gin.Context) {
 	})
 
 	Conn.SetCloseHandler(func(code int, text string) error {
-		
-		fmt.Printf("[DEBUG] WebSocket closed. Code: %d, Text: %s\n", code, text)
-		
+				
 		Misc.RemoveWebSocket(Conn)
 		
 		return nil
 		
 	})
 
-	// Keep reading to detect disConnects
+	// Keep reading to detect disconnects
 	
 	go func() {
 		
@@ -79,21 +74,19 @@ func WatchServices(GinContext *gin.Context) {
 			
 			Misc.RemoveWebSocket(Conn)
 			Conn.Close()
-			
-			fmt.Println("[DEBUG] WebSocket Connection closed and cleaned up")
-			
+									
 		}()
 
 		for {
 			
-			_, _, err := Conn.ReadMessage()
+			_, _, ReadErr := Conn.ReadMessage()
 			
-			if err != nil {
+			if ReadErr != nil {
 				
-				fmt.Printf("[DEBUG] WebSocket read error: %v\n", err)
 				break
 				
 			}
+			
 		}
 		
 	}()
