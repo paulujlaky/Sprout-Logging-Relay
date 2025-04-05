@@ -76,10 +76,10 @@
 
     },
 
-    "WatchServiceLogs": {
+    "WatchForLogs": {
 
         "Method": "GET",
-        "Path": "/API/Services/:ServiceUID/Logs/Watch",
+        "Path": "/API/Logs/Watch",
 
         "RateLimitConfig": {
 

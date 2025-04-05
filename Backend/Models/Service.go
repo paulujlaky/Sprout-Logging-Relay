@@ -123,6 +123,7 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 	}
 
 	NewLog.Content.Features = NewLog.parseRawLogContent() // parse the raw log content into features
+	NewLog.HTML = NewLog.ToHTML() // convert the log to HTML
 
 	AssociatedService.Logs = append(AssociatedService.Logs, NewLog) 
 
@@ -130,6 +131,6 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	_, WriteError := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
 
-	return WriteError, &NewLog
+	return WriteError, &NewLog // return the new log and any errors that occurred
 
 }

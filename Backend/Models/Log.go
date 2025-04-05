@@ -127,6 +127,8 @@ type Log struct {
 
 	Created int64 `json:"Created"`
 
+	HTML string `json:"HTML"`
+
 }
 
 // Private Methods 
@@ -212,7 +214,9 @@ func (Log *Log) ToHTML() string {
 
 						<pre><code>%s</code></pre>
 
-					</div>`, Feature.Value)
+					</div>`, 
+					
+				Feature.Value)
 
 			}
 
@@ -226,7 +230,9 @@ func (Log *Log) ToHTML() string {
 
 						<a href="%s" target="_blank">%s</a>
 
-					</div>`, Feature.Value, Feature.Value)
+					</div>`,
+			
+				Feature.Value, Feature.Value)
 
 			}
 

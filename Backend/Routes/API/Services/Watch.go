@@ -4,13 +4,13 @@ import (
 	"elucid503/SproutLoggingRelay/Misc"
 	"elucid503/SproutLoggingRelay/Types"
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-func WatchServices(GinContext *gin.Context) {
+func WatchLogs(GinContext *gin.Context) {
 		
 	// This will be a WebSocket route
 	
@@ -50,14 +50,6 @@ func WatchServices(GinContext *gin.Context) {
 	
 	// Ping/Pong Handling 
 	
-	Conn.SetPongHandler(func(appData string) error {
-				
-		Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-		
-		return nil
-		
-	})
-
 	Conn.SetCloseHandler(func(code int, text string) error {
 				
 		Misc.RemoveWebSocket(Conn)
@@ -79,12 +71,21 @@ func WatchServices(GinContext *gin.Context) {
 
 		for {
 			
-			_, _, ReadErr := Conn.ReadMessage()
+			_, MessageBytes, ReadErr := Conn.ReadMessage()
 			
 			if ReadErr != nil {
 				
 				break
 				
+			}
+
+			// Check if the message is a ping
+
+			if strings.Contains(strings.ToLower(string(MessageBytes)), "ping") {
+
+				Conn.WriteMessage(websocket.TextMessage, []byte("Pong"))
+				continue
+
 			}
 			
 		}
