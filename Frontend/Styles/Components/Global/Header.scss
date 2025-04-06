@@ -70,7 +70,7 @@
 
     @include TransparentContainerMod();
 
-    margin-right: 6rem; // make a bit more "center"
+    margin-right: 4rem; // make a bit more "center"
 
     @include RespondTo("Mobile") {
 
