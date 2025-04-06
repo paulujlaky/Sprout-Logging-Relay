@@ -72,7 +72,17 @@
 
     <div class="Container VerticalFlex DashHeaderMessage">
 
+      <div class="DashHeaderMessageTextLarge">
 
+        Viewing All Services
+
+      </div>
+
+      <div class="DashHeaderMessageTextMedium Listed">
+
+        <span class="DashHeaderMessageCount Warnings">0 Warnings</span> • <span class="DashHeaderMessageCount Errors">0 Errors</span>  
+
+      </div>
       
     </div>
 
@@ -86,8 +96,52 @@
 
   <main class="DashMain">
 
+    <div class="Container Transparent VerticalFlex ServiceLogsContainer">
+
+    </div>
+
 
   </main>
+
+  <footer>
+
+    <div class="Container Glass Transparent HorizontalFlex DashFooter">
+
+      <div class="Container Transparent HorizontalFlex LoggingViewControlButtons">
+
+          <SelectMenu Value="All" id="ServiceSelect">
+
+            <div class="SelectMenuLabel">All Services</div>
+
+            <SelectMenuOptions> 
+
+              <SelectMenuOption Value="All">All Services</SelectMenuOption>
+              <SelectMenuOption Value="SyntharaForWeb">Synthara For Web</SelectMenuOption>
+              <SelectMenuOption Value="SyntharaForDiscord">Synthara For Discord</SelectMenuOption>
+              <SelectMenuOption Value="SproutWebServices">Sprout Web Services</SelectMenuOption>
+      
+            </SelectMenuOptions>
+
+            <div class="SelectMenuIcon">
+
+              <ion-icon name="chevron-up"></ion-icon>
+
+            </div>
+
+          </SelectMenu>
+
+      </div>
+
+      <div class="Container Transparent HorizontalFlex LoggingViewControlButtons">
+
+        <Button class="ServiceLogControlButton" id="RefreshButton"><span class="ButtonLabel">Reload</span> <ion-icon name="refresh"></ion-icon></Button>
+        <a href="https://sprout.software/Status" target="_blank"><Button class="ServiceLogControlButton"><span class="ButtonLabel">Service Status</span> <ion-icon name="open-outline"></ion-icon></Button></a>
+
+      </div>
+
+    </div>
+      
+  </footer>
 
   <!-- Context Menu -->
 

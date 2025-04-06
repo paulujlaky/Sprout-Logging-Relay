@@ -22,6 +22,12 @@ const RelevantElements = {
 
     },
 
+    Selects: {
+
+        ServiceSelect: $("#ServiceSelect")
+
+    },
+
     Misc: {
 
         Branding: $(".DashHeaderBranding"),
@@ -35,6 +41,7 @@ const RelevantElements = {
 export function WatchPageInteractions(): void {
 
     HandleToggleClicks();
+    HandleSelectMenuInteractions();
 
     HandleContextMenuInteractions();
 
@@ -96,6 +103,80 @@ function HandleToggleClicks(): void {
         const Toggle = Target.closest("Toggle");
 
         Toggle.toggleClass("Active");
+
+    });
+
+}
+
+function HandleSelectMenuInteractions(): void {
+
+    const SelectMenus = $("SelectMenu");
+
+    SelectMenus.on("click", (Event: JQuery.MouseEventBase | JQuery.TouchEventBase) => {
+
+        const RelevantSelectMenu = $(Event.target).closest("SelectMenu");
+
+        const SelectMenuIcon = RelevantSelectMenu.find(".SelectMenuIcon");
+        const SelectMenuOptions = RelevantSelectMenu.find("SelectMenuOptions");
+
+        const IsOpen = SelectMenuOptions.is(":visible");
+
+        // Opens above the select menu
+
+        const Coords: { X: number, Y: number } = {
+
+            X: RelevantSelectMenu.position().left, // left of the select menu
+            Y: ((RelevantSelectMenu.position().top - (SelectMenuOptions.outerHeight() || 0)) - 10) // top of the select menu - height of the options - 10px for spacing
+
+        };
+
+        SelectMenuOptions.css({ top: Coords.Y, left: Coords.X }); // set the position of the menu
+
+        if (IsOpen) {
+
+            SelectMenuOptions.hide();
+            SelectMenuIcon.html("<ion-icon name='chevron-up'></ion-icon>");
+
+        } else {
+
+            SelectMenuOptions.show();
+            SelectMenuIcon.html("<ion-icon name='chevron-down'></ion-icon>");
+
+        }
+
+    });        
+
+}
+
+interface SelectMenuOption {
+
+    Name: string;
+    Value: string;
+
+}
+
+export function WaitForSelectMenuResponse(SelectMenu: JQuery<HTMLElement>, OptionClickCallback: (Option: SelectMenuOption) => void): void {
+
+    const Options = SelectMenu.find("SelectMenuOption"); // gets all INDIVIDUAL options
+
+    const UpdateSelectMenuWithOption = (Option: SelectMenuOption): void => {
+
+        SelectMenu.find(".SelectMenuLabel").text(Option.Name); // update the label with the new option name
+        SelectMenu.attr("Value", Option.Value); // update the value of the select menu
+
+    }
+
+    Options.on("click", (Event: JQuery.MouseEventBase | JQuery.TouchEventBase) => {
+
+        const RelatedOption = $(Event.target).closest("SelectMenuOption");
+
+        const OptionValue = RelatedOption.attr("Value") || ""; // get the value of the option
+        const OptionName = RelatedOption.text(); // the element text is the name
+
+        const Option: SelectMenuOption = { Name: OptionName, Value: OptionValue };
+
+        OptionClickCallback(Option); // call the callback with the option
+        UpdateSelectMenuWithOption(Option); // update the select menu with the new option
 
     });
 

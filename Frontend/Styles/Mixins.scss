@@ -76,19 +76,19 @@
 
     @if $Breakpoint == "Mobile" {
 
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
             @content;
         }
 
     } @else if $Breakpoint == "Tablet" {
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             @content;
         }
 
     } @else if $Breakpoint == "Desktop" {
 
-        @media (min-width: 901px) {
+        @media (min-width: 951px) {
             @content;
         }
 

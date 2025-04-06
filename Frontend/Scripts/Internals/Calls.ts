@@ -25,7 +25,7 @@ export async function GetAllServices(): Promise<Service[]> {
 
 // Logs
 
-export async function GetServiceLogs(): Promise<ServiceLog[]> {
+export async function GetAllLogs(): Promise<ServiceLog[]> {
 
     const Response = await MakeRequest(Routes.ViewLogs);
 
@@ -40,7 +40,7 @@ export async function GetServiceLogs(): Promise<ServiceLog[]> {
 
 }
 
-export async function WatchForNewLogs(NewLogCallback: (Log: ServiceLog) => void): Promise<void> {
+export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: ServiceLog) => void): Promise<void> {
 
     // We will use a websocket
 
@@ -79,21 +79,20 @@ export async function WatchForNewLogs(NewLogCallback: (Log: ServiceLog) => void)
 
         }
 
-        if (!ParsedData || !ParsedData.UID) {
+        if (!ParsedData || !ParsedData.JSON?.ServiceUID) {
 
-            Log("Error", "Unknown or corrupt message coming from websocket.");
-            return;
+            return; // May not be related data for a new log
 
         }
 
-        ParsedData = ParsedData satisfies {
+        ParsedData = ParsedData.JSON as {
 
-            UID: string;
+            ServiceUID: string;
             Log: ServiceLog;
 
         }
 
-        NewLogCallback(ParsedData.Log); // Call the callback with the new log. here, the cb will run as many times as the logs are received
+        NewLogCallback(ParsedData.ServiceUID, ParsedData.Log); // Call the callback with the new log. here, the cb will run as many times as the logs are received
 
     }
 

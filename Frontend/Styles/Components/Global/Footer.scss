@@ -1,0 +1,15 @@
+.LoggingViewControlButtons {
+
+    gap: calc($SpacingSmall * 1.5)!important;
+
+}
+
+.ServiceLogControlButton {
+
+    ion-icon {
+
+        font-size: $FontSizeLarge;
+
+    }
+
+}

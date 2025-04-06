@@ -1,4 +1,4 @@
-import type { Storage } from "./Misc/Structs";
+import type { ServiceLog, Storage } from "./Misc/Structs";
 
 import { Authorize } from "./Systems/Auth";
 

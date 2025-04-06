@@ -1,3 +1,11 @@
+// Links 
+
+a {
+
+    text-decoration: none;
+
+}
+
 // Inputs
 
 Input[type="text"], Input[type="password"], Input[type="email"] {
@@ -73,6 +81,85 @@ Toggle.Active {
     ion-icon {
 
         opacity: 1;
+
+    }
+
+}
+
+// Select Menu 
+
+SelectMenu {
+
+    @include Container;
+    @include FlexHorizontal;
+    
+    justify-content: space-between;
+
+    background-color: $ElementColorMedium;
+    border-radius: calc($BorderRadiusLarge / 1.5);
+
+    padding: $SpacingSmall $SpacingMedium;
+
+    gap: $SpacingMedium;
+
+    cursor: pointer;
+
+}
+
+.SelectMenuLabel {
+
+    font-size: $FontSizeMedium;
+    
+    user-select: none;
+
+}
+
+.SelectMenuIcon {
+
+    @include FlexCenter;
+
+    font-size: $FontSizeMedium;
+
+}
+
+SelectMenuOptions {
+
+    @include Container;
+    @include GlassBackground;
+    @include FlexVertical;
+
+    position: absolute;
+    z-index: 100;
+
+    gap: calc($SpacingSmall * 0.75);
+
+    padding: calc($SpacingSmall * 1.25) calc($SpacingSmall * 1.5);
+
+    // Must be last to override Container mixin 
+
+    display: none;
+    
+}
+
+SelectMenuOption {
+
+    @include FlexHorizontal;
+    justify-content: space-between;
+
+    min-width: 100%;
+
+    padding: $SpacingSmall;
+    margin-left: -5px;
+
+    gap: $SpacingLarge;
+
+    border-radius: calc($BorderRadiusLarge * 0.75);
+
+    transition: background-color $TransitionTime;
+
+    &:hover {
+
+        background-color: $ElementColorLight;
 
     }
 

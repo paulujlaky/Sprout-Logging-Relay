@@ -22,6 +22,16 @@ Button {
     
 }
 
+.ButtonLabel {
+
+    @include RespondTo('Mobile') {
+
+        display: none;
+
+    }
+
+}
+
 Button:hover {
 
     background-color: $ElementColorLightest;
