@@ -11,7 +11,7 @@ func GetServiceList(GinContext *gin.Context) {
 
 	// Get all services
 
-	Services, ErrorGettingServices := Models.ListServices()
+	Services, ErrorGettingServices := Models.ListServices(false) // Do not get logs for services in this case
 
 	if ErrorGettingServices != nil {
 

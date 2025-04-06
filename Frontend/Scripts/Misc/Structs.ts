@@ -47,3 +47,57 @@ export interface SproutAccount {
     Flags: string[];
     
 }
+
+// Services & Logs
+
+export enum LogLevel {
+
+    Info = 0,
+    Warning = 1,
+    Error = 2
+
+}
+
+export type FeatureType = "code" | "link";
+
+interface LogFeature {
+
+    Type: FeatureType;
+    Value: string;
+
+}
+
+interface LogContent {
+
+    Title: string;
+    Description: string;
+
+    Features: LogFeature[];
+
+}
+
+export interface ServiceLog {
+
+    Level: LogLevel;
+
+    Content: LogContent;
+
+    Created: number;
+
+    HTML?: string; // Is defined everywhere on backend, but was added later on... so best to be cautious
+
+}
+
+export interface Service {
+
+    UID: string;
+
+    Name: string;
+    Description: string;
+    Icon: string;
+
+    Logs: ServiceLog[];
+
+    MaxLogs: number;
+
+}

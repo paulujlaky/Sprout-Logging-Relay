@@ -11,8 +11,7 @@ export const GlobalStorage: Storage = {
 
     Cache: {
 
-        Files: {},
-        Dirs: {}
+        Services: {}
 
     }
 

@@ -89,6 +89,25 @@ func GetRoutes() map[string]RouteInfo {
 
 		},
 
+		
+		"/API/Logs/View": {
+
+			Method:  "GET",
+			Handler: LogRoutes.ViewLogs,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 180,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
+		// Service-Specific Log Routes
+
 		"/API/Services/:ServiceUID/Logs/Create": {
 
 			Method:  "POST",
@@ -102,22 +121,6 @@ func GetRoutes() map[string]RouteInfo {
 			},
 
 			Authorized:false, // services must be able to call this route programmatically
-
-		},
-
-		"/API/Services/:ServiceUID/Logs/View": {
-
-			Method:  "GET",
-			Handler: LogRoutes.ViewLogs,
-
-			RateLimitConfig: &Middleware.RouteRateLimitConfig{
-
-				MaxRequestsAllowed: 180,
-				TimeWindow:         60,
-
-			},
-
-			Authorized: true,
 
 		},
 		

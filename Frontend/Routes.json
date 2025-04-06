@@ -60,10 +60,10 @@
 
     },
 
-    "ViewServiceLogs": {
+    "ViewLogs": {
 
         "Method": "GET",
-        "Path": "/API/Services/:ServiceUID/Logs/View",
+        "Path": "/API/Logs/View",
 
         "RateLimitConfig": {
 

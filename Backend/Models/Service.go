@@ -54,12 +54,18 @@ func NewService(Name string, Description string, Icon string) Service {
 
 }
 
-func ListServices() ([]Service, error) {
+func ListServices(WithLogs bool) ([]Service, error) {
 
 	var Services []Service = []Service{}
 
-	Options := options.Find().SetProjection(gin.H{"logs": 0}) // exclude logs from the response since it would be too large and not make sense in this context
+	Options := options.Find()
+
+	if !WithLogs {
+
+		Options.SetProjection(gin.H{"logs": 0}) // exclude logs from the response using this projection
 	
+	} 
+		
 	DBCursor, Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
 
 	if Err != nil {
@@ -93,8 +99,6 @@ func GetServiceByUID(UID string) (*Service, error) {
 	return &ServiceData, nil
 	
 }
-
-// Internal Funcs
 
 // Public Funcs
 
