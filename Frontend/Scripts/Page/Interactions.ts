@@ -1,8 +1,8 @@
 import $ from 'jquery';
 
-import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
+import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { GetAllServices, GetService } from '../Internals/Calls';
-import { LogLevel } from '../Misc/Structs';
+import { LogLevel, type Service } from '../Misc/Structs';
 import { Log, PluralizeWord } from '../Misc/Utils';
 
 const RelevantElements = {
@@ -34,19 +34,6 @@ const RelevantElements = {
     Misc: {
 
         Branding: $(".DashHeaderBranding"),
-
-        CurrentService: {
-
-            Label: $(".DashHeaderMessageService"),
-
-            LogStats: {
-
-                Warnings: $(".DashHeaderMessageCount.Warnings"),
-                Errors: $(".DashHeaderMessageCount.Errors"),
-
-            }
-
-        }
 
     }
     
@@ -126,25 +113,22 @@ function WatchForServiceSwitches(): void {
 
         if (!Service) { return; } // if the service is null, return
 
-        // Make switch 
-
-        // TODO: refactor this to be in a seperate function
-
-        Log("Info", `Switching to service ${Service.Name} (UID ${ServiceUID})`); // log the switch
-        
-        // Update UI 
-        
-        RelevantElements.Misc.CurrentService.Label.text(Service.Name); // update the label with the service name
-
-        const Warnings = Service.Logs.filter((Log) => Log.Level == LogLevel.Warning).length; // get the warning count
-        const Errors = Service.Logs.filter((Log) => Log.Level == LogLevel.Error).length; // get the error count
-
-        RelevantElements.Misc.CurrentService.LogStats.Warnings.text(`${Warnings} ${PluralizeWord(Warnings, "Warning", "Warnings")}`); // update the warning count
-        RelevantElements.Misc.CurrentService.LogStats.Errors.text(`${Errors} ${PluralizeWord(Errors, "Error", "Errors")}`); // update the error count
+        SwitchToService(Service); // switch to the service
         
     }
 
     HandleSelectMenuResponse(RelevantElements.Selects.ServiceSelect, SelectMenuHandler); // handle the select menu response
+
+}
+
+function SwitchToService(Service: Service): void {
+
+    Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
+        
+    UpdateUIWithService(Service); // update the UI with the new service
+
+    // Render logs (TODO) (rather big to-do :)
+
 
 }
 

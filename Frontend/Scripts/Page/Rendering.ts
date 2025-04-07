@@ -1,8 +1,9 @@
 import $ from "jquery";
 
-import { AnimationTimes, type Service, type SproutAccount } from "../Misc/Structs";
+import { AnimationTimes, LogLevel, type Service, type SproutAccount } from "../Misc/Structs";
 
 import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+import { PluralizeWord } from "../Misc/Utils";
 
 const RelevantElements = {
 
@@ -28,6 +29,23 @@ const RelevantElements = {
     Selects: {
 
         Services: $("#ServiceSelect"),
+
+    },
+
+    States: {
+
+        CurrentService: {
+
+            Label: $(".DashHeaderMessageService"),
+
+            LogStats: {
+
+                Warnings: $(".DashHeaderMessageCount.Warnings"),
+                Errors: $(".DashHeaderMessageCount.Errors"),
+
+            }
+
+        }
 
     },
 
@@ -237,5 +255,19 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
         Options.append(Option);
 
     }
+
+}
+
+// Service State
+
+export function UpdateUIWithService(Service: Service): void {
+
+    RelevantElements.States.CurrentService.Label.text(Service.Name); // update the label with the service name
+
+    const Warnings = Service.Logs.filter((Log) => Log.Level == LogLevel.Warning).length; // get the warning count
+    const Errors = Service.Logs.filter((Log) => Log.Level == LogLevel.Error).length; // get the error count
+
+    RelevantElements.States.CurrentService.LogStats.Warnings.text(`${Warnings} ${PluralizeWord(Warnings, "Warning", "Warnings")}`); // update the warning count
+    RelevantElements.States.CurrentService.LogStats.Errors.text(`${Errors} ${PluralizeWord(Errors, "Error", "Errors")}`); // update the error count
 
 }
