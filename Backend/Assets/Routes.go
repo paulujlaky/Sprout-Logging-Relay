@@ -9,8 +9,8 @@ import (
 	APIRoutes "elucid503/SproutLoggingRelay/Routes/API"
 	AuthRoutes "elucid503/SproutLoggingRelay/Routes/API/Auth"
 
+	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Logs"
 	ServiceRoutes "elucid503/SproutLoggingRelay/Routes/API/Services"
-	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Services/Logs"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,7 +89,6 @@ func GetRoutes() map[string]RouteInfo {
 
 		},
 
-		
 		"/API/Logs/View": {
 
 			Method:  "GET",
@@ -112,6 +111,22 @@ func GetRoutes() map[string]RouteInfo {
 
 			Method:  "POST",
 			Handler: LogRoutes.CreateLog,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 120,
+				TimeWindow:         60,
+
+			},
+
+			Authorized:false, // services must be able to call this route programmatically
+
+		},
+
+		"/API/Services/:ServiceUID/Logs/View": {
+
+			Method:  "GET",
+			Handler: ServiceRoutes.ViewServiceSpecificLogs,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 

@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { AnimationTimes, type SproutAccount } from "../Misc/Structs";
+import { AnimationTimes, type Service, type SproutAccount } from "../Misc/Structs";
 
 import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 
@@ -22,6 +22,12 @@ const RelevantElements = {
     Dialogs: { 
         
         Overlay: $(".DashDialogOverlay")
+
+    },
+
+    Selects: {
+
+        Services: $("#ServiceSelect"),
 
     },
 
@@ -196,5 +202,40 @@ export function ShowContextMenu(Event: JQuery.MouseEventBase | JQuery.TouchEvent
         RelevantElements.CtxMenu.hide();
 
     });
+
+}
+
+// Service Select
+
+export function PopulateServiceSelect(Services: Partial<Service>[]): void {
+
+    // Prepend "All Services" as an option
+
+    Services.unshift({ Name: "All Services", UID: "All" });
+    
+    const ServiceSelect = RelevantElements.Selects.Services;
+
+    const Options = ServiceSelect.find("SelectMenuOptions");
+
+    Options.html(""); // Clear existing options
+
+    ServiceSelect.attr("Value", Services[0].UID!); // Set default value
+    ServiceSelect.find(".SelectMenuLabel").text(Services[0].Name!); // Set default label
+
+    for (const Service of Services) {
+
+        const Option = /*html*/ `
+
+            <SelectMenuOption Value="${Service.UID}">
+
+                ${Service.Name}
+
+            </SelectMenuOption>
+
+        `;
+
+        Options.append(Option);
+
+    }
 
 }

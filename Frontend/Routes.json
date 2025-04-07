@@ -76,6 +76,22 @@
 
     },
 
+    "ViewServiceSpecificLogs": {
+
+        "Method": "GET",
+        "Path": "/API/Services/:ServiceUID/Logs/View",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 180,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
     "WatchForLogs": {
 
         "Method": "GET",

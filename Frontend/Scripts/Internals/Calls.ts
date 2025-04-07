@@ -2,9 +2,10 @@
 
 import type { ServiceLog, Service } from "../Misc/Structs";
 
-import { Log, MakeRequest } from "../Misc/Utils";
+import { AddItemToCache, Log, MakeRequest } from "../Misc/Utils";
 
 import Routes from "../../Routes.json";
+import { GlobalStorage } from "../Main";
 
 // Services
 
@@ -19,11 +20,86 @@ export async function GetAllServices(): Promise<Service[]> {
 
     }
 
-    return Response.JSON as Service[];
+    const Services = Response.JSON as Service[];
+    
+    Services.forEach((Service) => {
+
+        AddItemToCache("Services", Service.UID, Service); // Add to cache
+
+    });
+
+    return Services;
+
+}
+
+export async function GetService(ServiceUID: string, ReturnLogs: boolean = false): Promise<Service | null> {
+
+    if (ServiceUID == "All") {
+
+        return {
+
+            UID: "All",
+
+            Name: "All Services",
+            Icon: "https://cdn.sprout.software/Files/Sprout/Logos/Sprout.png", 
+
+            Description: "N/A",
+
+            Logs: ReturnLogs ? await GetAllLogs() : [], // Get all logs if requested
+
+            MaxLogs: 0, // Not applicable for all services
+
+        } satisfies Service; 
+
+    }
+
+    // Check cache first
+
+    let Service: Service | null = GlobalStorage.Cache.Services[ServiceUID]?.Data || null; // Check if the service is in the cache
+
+    if (!Service) {
+    
+        const Services = await GetAllServices(); // If not in cache, get all services to ensure we have the latest data
+
+        Service = Services.find((Service) => Service.UID == ServiceUID) || null; // Attempt to find the service in the list of services
+        
+    }
+
+    if (!Service) {
+
+        Log("Error", "Failed to get service from backend.");
+        return null;
+
+    }
+
+    if (ReturnLogs) {
+
+        Service.Logs = await GetServiceLogs(ServiceUID); // Get logs for the service if requested
+
+    }
+
+    return Service; // Will automatically be sorted by most recent
 
 }
 
 // Logs
+
+export async function GetServiceLogs(ServiceUID: string): Promise<ServiceLog[]> {
+
+    // Get all logs for a service
+
+    const Response = await MakeRequest(Routes.ViewServiceSpecificLogs, null, {}, { ServiceUID: ServiceUID });
+
+    if (!Response || !Response.JSON) {
+
+        Log("Error", "Failed to get service logs from backend.");
+        return [];
+
+    }
+
+    return Response.JSON as ServiceLog[]; // Will automatically be sorted by most recent
+
+}
 
 export async function GetAllLogs(): Promise<ServiceLog[]> {
 

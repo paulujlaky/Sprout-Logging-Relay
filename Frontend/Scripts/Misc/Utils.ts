@@ -126,3 +126,11 @@ export function CopyToClipboard(Text: string): void {
     navigator.clipboard.writeText(Text).catch((Err) => Log("Error", `Clipboard: Copy failed" ${Err}`));
 
 }
+
+// Strings
+
+export function PluralizeWord(Count: number, Singular: string, Plural: string): string {
+
+    return `${Count == 1 ? Singular : Plural}`;
+
+}
