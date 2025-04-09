@@ -1,9 +1,7 @@
 import $ from 'jquery';
 
-import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
+import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { GetAllServices, GetService } from '../Internals/Calls';
-import { LogLevel, type Service } from '../Misc/Structs';
-import { Log, PluralizeWord } from '../Misc/Utils';
 
 const RelevantElements = {
 
@@ -120,18 +118,6 @@ function WatchForServiceSwitches(): void {
     HandleSelectMenuResponse(RelevantElements.Selects.ServiceSelect, SelectMenuHandler); // handle the select menu response
 
 }
-
-function SwitchToService(Service: Service): void {
-
-    Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
-        
-    UpdateUIWithService(Service); // update the UI with the new service
-
-    // Render logs (TODO) (rather big to-do :)
-
-
-}
-
 // Misc
 
 function HandleToggleClicks(): void {

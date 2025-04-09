@@ -3,7 +3,7 @@ import $ from "jquery";
 import { AnimationTimes, LogLevel, type Service, type SproutAccount } from "../Misc/Structs";
 
 import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
-import { PluralizeWord } from "../Misc/Utils";
+import { Log, PluralizeWord } from "../Misc/Utils";
 
 const RelevantElements = {
 
@@ -29,6 +29,12 @@ const RelevantElements = {
     Selects: {
 
         Services: $("#ServiceSelect"),
+
+    },
+
+    Containers: {
+
+        Logs: $(".Container.ServiceLogsContainer"),
 
     },
 
@@ -259,6 +265,24 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 }
 
 // Service State
+
+export function SwitchToService(Service: Service): void {
+
+    Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
+        
+    UpdateUIWithService(Service); // update the UI with the new service
+
+    // Render the actual logs
+
+    const HTML = Service.Logs.map((Log) => Log.HTML).join("");
+
+    RelevantElements.Containers.Logs.html(HTML); // update the main panel with the new logs
+
+    // Scroll to the bottom, which will be the most recent logs
+
+    RelevantElements.Containers.Logs.scrollTop(RelevantElements.Containers.Logs[0].scrollHeight);
+
+}
 
 export function UpdateUIWithService(Service: Service): void {
 

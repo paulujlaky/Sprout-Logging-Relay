@@ -3,6 +3,7 @@ package Models
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type LogLevel int
@@ -254,8 +255,8 @@ func (Log *Log) ToHTML() string {
 
 			<div class="LogMetaTimestamp">
 
-				<script>document.write(new Date(%d).toLocaleString());</script>
-
+				<time datetime="%s">%s</time>
+			
 			</div>
 
 		</div>
@@ -272,6 +273,12 @@ func (Log *Log) ToHTML() string {
 
 		</div>
 
-	</div>`, StringLevel, StringLevel, Log.Created, Log.Content.Title, Log.Content.Description);
+	</div>`, StringLevel,  StringLevel, 
+
+	time.Unix(Log.Created, 0).Format(time.RFC3339), // Format Unix timestamp to ISO 8601
+	time.Unix(Log.Created, 0).Format("Jan 2, 2006 15:04:05"), // Human-readable format
+	
+	Log.Content.Title, 
+	Log.Content.Description);
 
 }

@@ -2,8 +2,10 @@ import type { Storage } from "./Misc/Structs";
 
 import { Authorize } from "./Systems/Auth";
 
-import { HideLoadingView } from "./Page/Rendering";
+import { HideLoadingView, SwitchToService } from "./Page/Rendering";
 import { WatchPageInteractions } from "./Page/Interactions";
+
+import { GetService } from "./Internals/Calls";
 
 export const GlobalStorage: Storage = {
 
@@ -24,5 +26,9 @@ if (IsAuthed) {
     HideLoadingView();
 
     WatchPageInteractions();
+
+    const AllServices = await GetService("All", true);
+    
+    AllServices ? SwitchToService(AllServices) : null;
 
 }

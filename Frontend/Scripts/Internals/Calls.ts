@@ -92,8 +92,7 @@ export async function GetServiceLogs(ServiceUID: string): Promise<ServiceLog[]> 
 
     if (!Response || !Response.JSON) {
 
-        Log("Error", "Failed to get service logs from backend.");
-        return [];
+        return []; // May not be a failure... no logs
 
     }
 
@@ -107,8 +106,7 @@ export async function GetAllLogs(): Promise<ServiceLog[]> {
 
     if (!Response || !Response.JSON) {
 
-        Log("Error", "Failed to get service logs from backend.");
-        return [];
+        return []; // Same failure case as above
 
     }
 
