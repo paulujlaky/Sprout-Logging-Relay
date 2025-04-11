@@ -48,7 +48,7 @@ func NewService(Name string, Description string, Icon string) Service {
 
 	}
 	
-	Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").InsertOne(context.TODO(), Service)
+	Misc.Database.Collection("Services").InsertOne(context.TODO(), Service)
 
 	return Service
 
@@ -66,7 +66,7 @@ func ListServices(WithLogs bool) ([]Service, error) {
 	
 	} 
 		
-	DBCursor, Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
+	DBCursor, Err := Misc.Database.Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
 
 	if Err != nil {
 
@@ -88,7 +88,7 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 	var ServiceData Service
 
-	Err := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").FindOne(context.TODO(), gin.H{"uid": UID}).Decode(&ServiceData)
+	Err := Misc.Database.Collection("Services").FindOne(context.TODO(), gin.H{"uid": UID}).Decode(&ServiceData)
 
 	if Err != nil {
 
@@ -127,13 +127,13 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 	}
 
 	NewLog.Content.Features = NewLog.parseRawLogContent() // parse the raw log content into features
-	NewLog.HTML = NewLog.ToHTML() // convert the log to HTML
+	NewLog.HTML = NewLog.ToHTML(AssociatedService) // convert the log to HTML
 
 	AssociatedService.Logs = append(AssociatedService.Logs, NewLog) 
 
 	// Update in DB 
 
-	_, WriteError := Misc.DbClient.Database("SproutLoggingRelay").Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
+	_, WriteError := Misc.Database.Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
 
 	return WriteError, &NewLog // return the new log and any errors that occurred
 

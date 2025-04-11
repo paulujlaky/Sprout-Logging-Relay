@@ -193,7 +193,7 @@ func (Log *Log) parseRawLogContent() []LogFeature {
 
 // Public Methods 
 
-func (Log *Log) ToHTML() string {
+func (Log *Log) ToHTML(RelatedService *Service) string {
 
 	// Convert log to HTML string
 
@@ -247,16 +247,44 @@ func (Log *Log) ToHTML() string {
 
 		<div class="LogMeta">
 
-			<div class="LogMetaLevel">
+			<div class="LogMetaGroup">
 
-				%s
+				<div class="LogMetaService">
+
+					%s
+
+				</div>
+
+				<span class="LogMetaSeparator">•</span>
+
+				<div class="LogMetaLevel">
+
+					%s
+
+				</div>
 
 			</div>
 
-			<div class="LogMetaTimestamp">
+			<div class="LogMetaGroup">
 
-				<time datetime="%s">%s</time>
-			
+				<div class="LogMetaTimestamp">
+
+					<div class="LogMetaTimestampDate">
+
+						%s
+
+					</div>
+
+					<span class="LogMetaSeparator">•</span>
+
+					<div class="LogMetaTimestampTime">
+
+						%s
+
+					</div>
+				
+				</div>
+
 			</div>
 
 		</div>
@@ -273,11 +301,11 @@ func (Log *Log) ToHTML() string {
 
 		</div>
 
-	</div>`, StringLevel,  StringLevel, 
-
-	time.Unix(Log.Created, 0).Format(time.RFC3339), // Format Unix timestamp to ISO 8601
-	time.Unix(Log.Created, 0).Format("Jan 2, 2006 15:04:05"), // Human-readable format
+	</div>`, StringLevel, RelatedService.Name, StringLevel, 
 	
+	time.Unix(Log.Created, 0).Format("Jan 2, 2006"), 
+	time.Unix(Log.Created, 0).Format("3:04 PM"),
+
 	Log.Content.Title, 
 	Log.Content.Description);
 

@@ -1,66 +1,22 @@
 .DashMain {
 
-    padding: 0 $SpacingLarge;
+    padding: 0 $SpacingMedium;
 
     @include FullWidthAndHeight();
 
-    margin-top: calc(5rem + $SpacingLarge); // 5rem = height of header; 1 of $SpacingMedium = extra margin
+    margin-top: calc(5rem + $SpacingMedium - 5px); // 5rem = height of header; 1 of $SpacingMedium = extra margin
+    margin-bottom: calc(5rem + $SpacingMedium + 5px); // same thing, just + this time
 
 }
 
-.DashMainHeader {
+.ServiceLogsContainer {
 
-    padding: 0 $SpacingSmall;
-    padding-bottom: 0.25rem;
+    @include FlexVertical();
 
-    margin-bottom: $SpacingLarge;
+    width: 100%;
 
-    background-color: $ElementColorDark;
-    
-    align-items: center;
+    gap: $SpacingLarge;
 
-    justify-content: space-between!important;
-    
-}
-
-.Container.DashMainHeaderIcon {
-
-    font-size: 64px;
-
-}
-
-.Container.DashMainHeaderContent {
-
-    align-items: start!important;
-    
-}
-
-.DashMainHeaderName {
-    
-    font-weight: $FontWeightSemiBold;
-
-    margin-bottom: $SpacingSmall;
-
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    
-    // Break anywhere 
-
-    word-break: break-word;
-    
-    
-}
-
-.DashMainFileList {
-
-    // Grid Layout 
-
-    display: grid;
-
-    grid-template-columns: repeat(auto-fit, minmax(335px, 1fr));
-    gap: $SpacingMedium;
-
-    margin-bottom: 6rem;
-    
 }
 
 .DashCodeInfill {

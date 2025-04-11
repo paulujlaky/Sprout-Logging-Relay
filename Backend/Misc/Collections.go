@@ -13,6 +13,7 @@ import (
 // Globals
 
 var DbClient *mongo.Client
+var Database *mongo.Database
 
 var ConnectedWebSockets []*websocket.Conn
 
@@ -33,6 +34,7 @@ func ConnectToDb(Config *Types.Config) error {
 	// Assign the client to the global variable
 
 	DbClient = Client
+	Database = Client.Database(Config.Database.Name)
 
 	return nil
 

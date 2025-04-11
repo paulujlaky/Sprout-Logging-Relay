@@ -1,0 +1,102 @@
+.InlineItem.Log {
+
+    @include Container();
+    @include GlassBackground();
+
+    @include FlexVertical();
+    
+    background-color: $ElementColorDark;
+
+    width: 100%;
+
+    gap: $SpacingMedium;
+
+    align-items: flex-start;
+
+}
+
+// Color-Classification
+
+.InlineItem.Log.Info {
+
+    // Blue Tint 
+
+    border-color: rgba(105, 105, 175, 0.5);
+
+}
+
+.InlineItem.Log.Warning {
+
+    // Yellow Tint 
+
+    border-color: rgba(160, 160, 95, 0.5);
+
+}
+
+.InlineItem.Log.Error {
+
+    // Red Tint 
+
+    border-color: rgba(185, 130, 130, 0.5);
+
+}
+
+// Header/Meta
+
+.InlineItem.Log .LogMeta {
+
+    @include FlexHorizontal();
+    
+    justify-content: space-between;
+
+    gap: $SpacingSmall;
+
+    width: 100%;
+
+}
+
+.InlineItem.Log .LogMeta .LogMetaGroup {
+
+    @include FlexHorizontal();
+    
+    gap: calc($SpacingSmall * 0.65);
+
+    font-size: calc($FontSizeSmall * 1.15);
+    
+}
+
+.InlineItem.Log .LogTitle {
+
+    font-size: $FontSizeLarge;
+
+    margin-bottom: -3.5px;
+
+}
+
+.InlineItem.Log .LogContent {
+
+    font-size: calc($FontSizeLarge * 0.9);
+
+}
+
+// Misc
+
+.LogMetaTimestamp {
+
+    @include FlexHorizontal();
+
+    gap: calc($SpacingSmall * 0.65);
+
+    color: $FontColorMuted;
+
+}
+
+.LogMetaTimestamp .LogMetaTimestampDate, .LogMetaTimestamp .LogMetaSeparator {  
+
+    @include RespondTo('Mobile') {
+
+        display: none;
+
+    }
+
+}
