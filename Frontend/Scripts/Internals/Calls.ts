@@ -9,6 +9,28 @@ import { GlobalStorage } from "../Main";
 
 // Services
 
+export async function CreateService(ServiceName: string, ServiceDescription: string, ServiceIconURL: string): Promise<Service | null> {
+
+    // Create a service with the given name, description, and icon URL
+
+    const Response = await MakeRequest(Routes.CreateService, { Name: ServiceName, Description: ServiceDescription, Icon: ServiceIconURL });
+
+    if (!Response || !Response.JSON) {
+
+        Log("Error", "Failed to create service.");
+        return null;
+
+    }
+
+    const Service = Response.JSON as Service;
+
+    AddItemToCache("Services", Service.UID, Service); // Add to cache
+
+    return Service; // Will automatically be sorted by most recent
+
+}
+
+
 export async function GetAllServices(): Promise<Service[]> {
 
     const Response = await MakeRequest(Routes.ListServices);

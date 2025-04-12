@@ -42,7 +42,7 @@ func CreateService(GinContext *gin.Context) {
 
 		"Message": "Service created",
 
-		"UID": Service.UID,
+		"JSON": Service,
 
 	})
 

@@ -98,6 +98,27 @@
 
     <div class="Container Transparent VerticalFlex ServiceLogsContainer">
 
+      <div class="Container Transparent HorizontalFlex ServiceLogsStart">
+
+        <div class="Container Transparent HorizontalFlex ServiceLogsStartIcon">
+
+          <ion-icon name="hourglass-outline"></ion-icon>
+
+        </div>
+
+        <div class="Container Transparent VerticalFlex ServiceLogsStartText">
+
+          <div class="ServiceLogsStartTextTitle">No Logs, Yet</div>
+          <div class="ServiceLogsStartTextSubtitle">This is the start of the log stream for <span class="DashHeaderMessageService DashCodeInfill">All Services</span></div>
+
+        </div>
+
+      </div>
+
+      <div class="Container Transparent VerticalFlex ServiceLogsContent">
+
+      </div>
+
     </div>
 
   </main>
@@ -123,6 +144,18 @@
             </div>
 
           </SelectMenu>
+
+          <Button class="ServiceLogControlButton" id="CreateService"><span class="ButtonLabel">Create</span> <ion-icon name="add-outline"></ion-icon></Button>
+
+      </div>
+
+      <div class="Container Transparent HorizontalFlex DashFooterMessageSection">
+
+        <div class="Container Transparent Center DashFooterMessageIcon">
+          
+        </div>
+
+        <div class="DashFooterMessageText"></div>
 
       </div>
 
@@ -182,7 +215,48 @@
     </div>
 
   </dialog>
+
+  <!-- Create Service Dialog -->
+
+  <dialog class="Container VerticalFlex DashDialog CreateServiceDialog" style="display: none;">
+
+    <div class="Container Transparent HorizontalFlex DashDialogHeader">
+
+      <div class="DashDialogTitle">Create Service</div>
+
+    </div>
+
+    <div class="Container Transparent VerticalFlex DashDialogBody CreateService">
+
+        <div class="DashDialogInputContainer">
   
+          <input type="text" id="ServiceName" class="DashDialogInput" placeholder="Enter Service Name">
+  
+        </div>
+
+        <div class="DashDialogInputContainer">
+  
+          <input type="text" id="ServiceDescription" class="DashDialogInput" placeholder="Enter Service Description">
+  
+        </div>
+
+        <div class="DashDialogInputContainer">
+  
+          <input type="text" id="ServiceIconURL" class="DashDialogInput" placeholder="Enter Service Icon URL">
+  
+        </div>
+  
+    </div>
+
+    <div class="Container Transparent HorizontalFlex DashDialogFooter">
+
+      <Button class="DashDialogButton DashDialogButtonCancel">Close</Button>
+      <Button class="DashDialogButton DashDialogButtonSubmit">Create</Button>
+
+    </div>
+
+  </dialog>
+
 </body>
 
 </html>

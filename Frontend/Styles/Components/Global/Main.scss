@@ -9,7 +9,7 @@
 
 }
 
-.ServiceLogsContainer {
+.ServiceLogsContainer, .ServiceLogsContent {
 
     @include FlexVertical();
 
@@ -19,11 +19,46 @@
 
 }
 
+.ServiceLogsContent {
+
+    padding: 0; // special case since within another container. kind of annoying, can be done better :(
+
+}
+
 .DashCodeInfill {
 
     background-color: $ElementColorLight;
 
     padding: 2px 4px;
     border-radius: $BorderRadiusSmall;
+
+}
+
+.ServiceLogsStart {
+
+    .ServiceLogsStartText {
+
+        align-items: start;
+
+        .ServiceLogsStartTextTitle {
+
+            font-size: $FontSizeLarge;
+
+        }
+
+        .ServiceLogsStartTextDescription {
+
+            font-size: $FontSizeMedium;
+
+        }
+
+    }
+    
+    .ServiceLogsStartIcon {
+
+        font-size: $FontSizeLarge * 4;
+        color: $FontColorMuted;
+        
+    }
 
 }

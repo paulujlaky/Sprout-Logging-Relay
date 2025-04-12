@@ -57,12 +57,30 @@ Dialog {
 
 }
 
+.DashDialogBody input {
+
+    width: 100%;
+
+}
+
 .DashDialogBody.AccountView {
 
     gap: 0;
         
     padding-top: 0;
     padding-bottom: 0;
+
+}
+
+.DashDialogBody.CreateService {
+
+    min-width: 300px;
+
+    @include RespondTo("Mobile") {
+
+        min-width: fit-content;
+
+    }
 
 }
 

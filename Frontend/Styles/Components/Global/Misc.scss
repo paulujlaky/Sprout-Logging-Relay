@@ -22,6 +22,9 @@ Input[type="text"], Input[type="password"], Input[type="email"] {
     font-size: $FontSizeSmall;
     letter-spacing: 0.5px;
 
+    font-family: inherit;
+    font-weight: 300;
+
 }
 
 Input:focus {
@@ -109,8 +112,16 @@ SelectMenu {
 .SelectMenuLabel {
 
     font-size: $FontSizeMedium;
+
+    white-space: nowrap;
     
     user-select: none;
+
+    @include RespondTo("Mobile") {
+
+        display: none;
+
+    }
 
 }
 
@@ -118,7 +129,7 @@ SelectMenu {
 
     @include FlexCenter;
 
-    font-size: $FontSizeMedium;
+    font-size: $FontSizeLarge;
 
 }
 
@@ -143,15 +154,15 @@ SelectMenuOptions {
 
 SelectMenuOption {
 
-    @include FlexHorizontal;
-    justify-content: space-between;
+    @include FlexVertical;
+    align-items: start;
+
+    gap: calc($SpacingSmall * 0.5);
 
     min-width: 100%;
 
     padding: $SpacingSmall;
     margin-left: -5px;
-
-    gap: $SpacingLarge;
 
     border-radius: calc($BorderRadiusLarge * 0.75);
 
@@ -162,6 +173,13 @@ SelectMenuOption {
         background-color: $ElementColorLight;
 
     }
+
+}
+
+.SelectMenuOptionDetails {
+
+    font-size: $FontSizeSmall;
+    color: $FontColorMuted;
 
 }
 

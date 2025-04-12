@@ -1,9 +1,11 @@
 import $ from "jquery";
 
-import { AnimationTimes, LogLevel, type Service, type SproutAccount } from "../Misc/Structs";
+import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
 import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 import { Log, PluralizeWord } from "../Misc/Utils";
+import { GlobalStorage } from "../Main";
+import { GetService } from "../Internals/Calls";
 
 const RelevantElements = {
 
@@ -34,7 +36,7 @@ const RelevantElements = {
 
     Containers: {
 
-        Logs: $(".Container.ServiceLogsContainer"),
+        Logs: $(".Container.ServiceLogsContent"),
 
     },
 
@@ -76,6 +78,56 @@ export function UpdateAuthElements(Account: SproutAccount) {
     
 }
 
+// Footer
+
+export function ShowFooterMessage(Mode: "Success" | "Info" | "Error", Message: string, HideTimeout: number = -1): void {
+
+    // assign an ID lock
+
+    const LockID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    $(".Container.DashFooterMessageSection .DashFooterMessageText").html(Message);
+    $(".Container.DashFooterMessageSection").css("display", "flex").attr("NotificationLockID", LockID);
+
+    const Icons = {
+
+        Success: `<ion-icon name="checkmark-circle-outline"></ion-icon>`,
+        Info: `<ion-icon name="information-circle-outline"></ion-icon>`,
+        Error: `<ion-icon name="warning-outline"></ion-icon>`
+
+    }
+
+    $(".Container.DashFooterMessageSection .DashFooterMessageIcon").html(Icons[Mode]);
+    $(".Container.DashFooterMessageSection .DashFooterMessageIcon").css("display", "flex");
+    
+    if (HideTimeout != -1) {
+
+        setTimeout(() => {
+
+            HideFooterMessage(LockID);
+
+        }, HideTimeout)
+
+    };
+
+}
+
+export function HideFooterMessage(LockID: string): void {
+
+    const FooterMessage = $(".Container.DashFooterMessageSection");
+
+    if (FooterMessage.attr("NotificationLockID") == LockID) {
+
+        FooterMessage.fadeOut(AnimationTimes.Short, () => {
+
+            FooterMessage.css("display", "none").attr("NotificationLockID", "");
+
+        });
+
+    }
+
+}
+
 // Dialogs
 
 export function ShowDialog(Dialog: JQuery<HTMLDialogElement>): void {
@@ -85,7 +137,8 @@ export function ShowDialog(Dialog: JQuery<HTMLDialogElement>): void {
 
     // Clear inputs
 
-    Dialog.find("input").val("").trigger("focus");
+    Dialog.find("input").first().trigger("focus"); // only focus on the first input
+    Dialog.find("input").val(""); // remove ALL values from inputs
     Dialog.find("Toggle").removeClass("Active");
 
     const CloseBtn = Dialog.find(".DashDialogButtonCancel");
@@ -252,7 +305,21 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 
             <SelectMenuOption Value="${Service.UID}">
 
-                ${Service.Name}
+                <span class="SelectMenuOptionName">
+                
+                    ${Service.Name}
+
+                </span>
+
+                    ${Service.UID !== "All" ?
+
+                        `<span class="SelectMenuOptionDetails">
+
+                            ${Service.UID}
+
+                        </span>`
+                        
+                    : ""}
 
             </SelectMenuOption>
 
@@ -274,11 +341,47 @@ export function SwitchToService(Service: Service): void {
 
     // Render the actual logs
 
+    if (Service.Logs.length == 0) {
+
+        RelevantElements.Containers.Logs.html(""); // clear the logs
+
+        $(".ServiceLogsStart").show(); // show the start message
+        return;
+
+    } else {
+
+        $(".ServiceLogsStart").hide(); // hide the start message
+
+    }
+
     const HTML = Service.Logs.map((Log) => Log.HTML).join("");
 
     RelevantElements.Containers.Logs.html(HTML); // update the main panel with the new logs
 
     // Scroll to the bottom, which will be the most recent logs
+
+    document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
+
+        top: document.scrollingElement.scrollHeight,
+        behavior: "smooth"
+
+    });
+
+}
+
+export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, FromSocket: boolean = false): Promise<void> {
+
+    if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
+
+        return; // if the log is from a socket and the service is not the current one, ignore it
+
+    }
+
+    const HTML = Log.HTML; // get the HTML for the log
+
+    if (!HTML) return; // if the HTML is empty, ignore it
+
+    RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
 
     document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 

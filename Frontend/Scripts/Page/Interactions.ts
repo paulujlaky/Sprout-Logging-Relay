@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
-import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
-import { GetAllServices, GetService } from '../Internals/Calls';
+import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
+import { CreateService, GetAllServices, GetService } from '../Internals/Calls';
 
 const RelevantElements = {
 
@@ -10,6 +10,10 @@ const RelevantElements = {
     Buttons: {
 
         AccountMenu: $(".DashHeaderAccount"),
+
+        ReloadBtn: $("#RefreshButton"),
+
+        CreateServiceBtn: $("#CreateService"),
 
     },
 
@@ -51,6 +55,8 @@ export async function WatchPageInteractions(): Promise<void> {
     WatchBrandingClick();
 
     WatchForAccountMenu();
+    WatchForReloadBtn();
+    WatchForCreateService();
 
     PopulateServiceSelect(await GetAllServices());
 
@@ -72,6 +78,68 @@ function WatchForAccountMenu(): void {
 
         HideDialog(Dialog);
 
+    });
+
+}
+
+// Create Service Dialog
+
+function WatchForCreateService(): void {
+
+    RelevantElements.Buttons.CreateServiceBtn.on("click", async () => {
+
+        const Dialog = $(".CreateServiceDialog") as JQuery<HTMLDialogElement>;
+
+        ShowDialog(Dialog);
+
+        const DialogResponse = await WaitForDialogResponse(Dialog);
+
+        HideDialog(Dialog);
+
+        if (!DialogResponse) { return; } // if the user cancelled, return
+
+        const ServiceName = $("#ServiceName").val() as string; // get the service name from the input
+        const ServiceDescription = $("#ServiceDescription").val() as string; // get the service type from the select menu
+        const ServiceIconURL = $("#ServiceIconURL").val() as string; // get the service icon URL from the input
+
+        if (!ServiceName || !ServiceDescription || !ServiceIconURL) { // if any of the values are empty, return
+
+            ShowFooterMessage("Error", "Please complete all fields", 2_500); 
+
+            return; // early return
+
+        }
+
+        const CreateResponse = await CreateService(ServiceName, ServiceDescription, ServiceIconURL); // create the service
+
+        if (CreateResponse?.UID) {
+
+            ShowFooterMessage("Success", `Created service ${CreateResponse.Name} (UID ${CreateResponse.UID})`, 5_000); // show success message
+
+        } else {
+            
+            ShowFooterMessage("Error", "Failed to create service", 2_500); // show error message
+
+        }
+
+        PopulateServiceSelect(await GetAllServices()); // repopulate the service select menu
+
+    });
+
+}
+
+// Reload Button
+
+async function WatchForReloadBtn(): Promise<void> {
+
+    RelevantElements.Buttons.ReloadBtn.on("click", async () => {
+
+        const CurrentService = RelevantElements.Selects.ServiceSelect.attr("Value") || ""; // get the current service UID
+
+        const Service = await GetService(CurrentService, true); // get the service (AND its logs) from the backend
+
+        Service && SwitchToService(Service); // switch to the service
+        
     });
 
 }
@@ -183,8 +251,6 @@ interface SelectMenuOption {
 
 export function HandleSelectMenuResponse(SelectMenu: JQuery<HTMLElement>, OptionClickCallback: (Option: SelectMenuOption) => void): void {
 
-    const Options = SelectMenu.find("SelectMenuOption"); // gets all INDIVIDUAL options
-
     const UpdateSelectMenuWithOption = (Option: SelectMenuOption): void => {
 
         SelectMenu.find(".SelectMenuLabel").text(Option.Name); // update the label with the new option name
@@ -192,12 +258,12 @@ export function HandleSelectMenuResponse(SelectMenu: JQuery<HTMLElement>, Option
 
     }
 
-    Options.on("click", (Event: JQuery.MouseEventBase | JQuery.TouchEventBase) => {
-
+    $(document).on("click", "SelectMenuOption", (Event: JQuery.MouseEventBase | JQuery.TouchEventBase) => { // listening this way will allow for new options to be added dynamically
+    
         const RelatedOption = $(Event.target).closest("SelectMenuOption");
 
         const OptionValue = RelatedOption.attr("Value") || ""; // get the value of the option
-        const OptionName = RelatedOption.text(); // the element text is the name
+        const OptionName = RelatedOption.find(".SelectMenuOptionName").text(); // the element text is the name
 
         const Option: SelectMenuOption = { Name: OptionName, Value: OptionValue };
 

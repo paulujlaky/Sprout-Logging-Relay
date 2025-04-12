@@ -30,6 +30,9 @@ export interface GlobalCache {
 export interface Storage {
 
     User: SproutAccount | null;
+
+    CurrentService: Service | null;
+
     Cache: GlobalCache;
 
 }
