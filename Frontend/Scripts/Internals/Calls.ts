@@ -170,7 +170,7 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
         } catch (Err) {
 
-            Log("Error", "Failed to parse message from websocket.");
+            // Was more likely than not just a ping/pong message, so we can ignore it safely
             return;
 
         }
@@ -191,6 +191,21 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
         NewLogCallback(ParsedData.ServiceUID, ParsedData.Log); // Call the callback with the new log. here, the cb will run as many times as the logs are received
 
     }
+
+    const PingInt = setInterval(() => {
+
+        if (WebSocketInstance.readyState == WebSocket.OPEN) {
+
+            WebSocketInstance.send("Ping"); // Send a ping every 5 seconds
+
+        } else if (WebSocketInstance.readyState == WebSocket.CLOSED) {
+
+            clearInterval(PingInt);
+            Log("Error", "Detected disconnection from logs websocket. Stopping ping.");
+            
+        }
+
+    }, 30_000); // 30 seconds
 
 }
 
