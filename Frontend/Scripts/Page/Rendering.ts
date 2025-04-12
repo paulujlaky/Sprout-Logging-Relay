@@ -2,7 +2,7 @@ import $ from "jquery";
 
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
-import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+import { IsUserScrolledUp, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 import { Log, PluralizeWord } from "../Misc/Utils";
 import { GlobalStorage } from "../Main";
 import { GetService } from "../Internals/Calls";
@@ -334,7 +334,7 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 
 // Service State
 
-export function SwitchToService(Service: Service): void {
+export function SwitchToService(Service: Service, SmoothScroll: boolean = false): void {
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
 
@@ -366,7 +366,7 @@ export function SwitchToService(Service: Service): void {
     document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
         top: document.scrollingElement.scrollHeight,
-        behavior: "smooth"
+        behavior: SmoothScroll ? "smooth" : "instant"
 
     });
 
@@ -374,9 +374,17 @@ export function SwitchToService(Service: Service): void {
 
 export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, FromSocket: boolean = false): Promise<void> {
 
+    const ShowAsNotificationInstead = async () => {
+
+        const FromService = await GetService(FromServiceUID); // get the service from the UID
+
+        FromService && ShowNewLogNotification(FromService); // show the notification (we know the service will be the current one)
+
+    }
+
     if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
 
-        return; // if the log is from a socket and the service is not the current one, ignore it
+        return ShowAsNotificationInstead(); // UID mismatch, so show the notification instead
 
     }
 
@@ -390,14 +398,32 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
         
     }
 
+    const IsScrolledUp = IsUserScrolledUp(250); // check if the user is scrolled up
+
     RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
 
-    document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
+    if (!IsScrolledUp) { // if the user is not scrolled up
 
-        top: document.scrollingElement.scrollHeight,
-        behavior: "smooth"
+        document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
-    });
+            top: document.scrollingElement.scrollHeight,
+            behavior: "smooth"
+
+        });
+        
+    } else {
+
+        // Just show notification
+
+        ShowAsNotificationInstead();
+        
+    }
+
+}
+
+export function ShowNewLogNotification(Service: Service): void {
+
+    ShowFooterMessage("Info", `New log from ${Service.Name} (UID ${Service.UID})`, 5_000); // show the notification
 
 }
 

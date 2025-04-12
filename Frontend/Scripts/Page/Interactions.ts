@@ -135,7 +135,7 @@ async function WatchForReloadBtn(): Promise<void> {
 
     RelevantElements.Buttons.ReloadBtn.on("click", async () => {
 
-        GlobalStorage.CurrentService && SwitchToService(GlobalStorage.CurrentService);
+        GlobalStorage.CurrentService && SwitchToService(GlobalStorage.CurrentService, true); // Smooth scroll for some fun
         
     });
 
@@ -287,11 +287,24 @@ export function RemoveDialogOnEscape(Dialog: JQuery<HTMLDialogElement>): void {
 
 }
 
+export function IsUserScrolledUp(Threshold: number = 0): boolean {
+
+    // Threshold will be number of pixels from the *bottom* of the page
+
+    const ScrollMax = ($(document).height() || 0) - ($(window).height() || 0); // get the max scroll height
+    const ScrollTop = $(window).scrollTop() || 0; // get the current scroll position
+
+    const ScrollBottom = ScrollMax - ScrollTop; // get the scroll position from the bottom
+
+    return (ScrollBottom >= Threshold); // return true if the scroll position is less than or equal to the threshold
+
+}
+
 export function SubmitDialogOnEnter(Dialog: JQuery<HTMLDialogElement>, EnterButton: JQuery<HTMLButtonElement>): void {
 
     const Listener = (Event: JQuery.KeyDownEvent) => {
 
-        if (Event.key === "Enter") {
+        if (Event.key === "Enter") { 
 
             EnterButton.trigger("click");
 
