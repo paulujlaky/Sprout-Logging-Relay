@@ -42,6 +42,8 @@
         
     }
 
+    white-space: nowrap;
+    
 }
 
 .DashHeaderImage {
@@ -77,6 +79,10 @@
         margin-right: 0;
         
     }
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     
 }
 
@@ -85,7 +91,11 @@
     font-size: $FontSizeLarge;
     font-weight: $FontWeightSemiBold;
 
-    white-space: nowrap;
+    @include RespondTo("Mobile") {
+
+        font-size: calc($FontSizeMedium * 1.05);
+        
+    }
 
 }
 
@@ -93,6 +103,12 @@
 
     font-size: $FontSizeMedium;
     font-weight: $FontWeightMedium;
+
+    @include RespondTo("Mobile") {
+
+        font-size: $FontSizeSmall;
+        
+    }
     
 }
 
