@@ -36,6 +36,7 @@ const RelevantElements = {
 
     Containers: {
 
+        Start: $(".Container.ServiceLogsStart"),
         Logs: $(".Container.ServiceLogsContent"),
 
     },
@@ -382,6 +383,12 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
     const HTML = Log.HTML; // get the HTML for the log
 
     if (!HTML) return; // if the HTML is empty, ignore it
+
+    if (RelevantElements.Containers.Start.is(":visible")) { // if the start message is visible, hide it
+
+        RelevantElements.Containers.Start.hide(); // hide the start message
+        
+    }
 
     RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
 
