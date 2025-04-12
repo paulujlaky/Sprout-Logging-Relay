@@ -2,6 +2,7 @@ import $ from 'jquery';
 
 import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, GetAllServices, GetService } from '../Internals/Calls';
+import { GlobalStorage } from '../Main';
 
 const RelevantElements = {
 
@@ -134,11 +135,7 @@ async function WatchForReloadBtn(): Promise<void> {
 
     RelevantElements.Buttons.ReloadBtn.on("click", async () => {
 
-        const CurrentService = RelevantElements.Selects.ServiceSelect.attr("Value") || ""; // get the current service UID
-
-        const Service = await GetService(CurrentService, true); // get the service (AND its logs) from the backend
-
-        Service && SwitchToService(Service); // switch to the service
+        GlobalStorage.CurrentService && SwitchToService(GlobalStorage.CurrentService);
         
     });
 

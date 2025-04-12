@@ -336,6 +336,8 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 export function SwitchToService(Service: Service): void {
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
+
+    GlobalStorage.CurrentService = Service; // set the current service in the global storage
         
     UpdateUIWithService(Service); // update the UI with the new service
 

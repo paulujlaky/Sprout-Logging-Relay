@@ -6,6 +6,7 @@ import { AppendLogToUI, HideLoadingView, SwitchToService } from "./Page/Renderin
 import { WatchPageInteractions } from "./Page/Interactions";
 
 import { GetService, WatchForLogs } from "./Internals/Calls";
+import { Log } from "./Misc/Utils";
 
 export const GlobalStorage: Storage = {
 
@@ -36,6 +37,8 @@ if (IsAuthed) {
     // Watch for new logs
 
     const LogListener = (ServiceUID: string, NewLog: ServiceLog) => {
+
+        Log("Info", `New log from websocket for service UID ${ServiceUID}`);
 
         AppendLogToUI(ServiceUID, NewLog, true); // Tell it from WS so ignore if not from same service as current selected
         
