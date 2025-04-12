@@ -280,7 +280,12 @@ export function SwitchToService(Service: Service): void {
 
     // Scroll to the bottom, which will be the most recent logs
 
-    RelevantElements.Containers.Logs.scrollTop(RelevantElements.Containers.Logs[0].scrollHeight);
+    document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
+
+        top: document.scrollingElement.scrollHeight,
+        behavior: "smooth"
+
+    });
 
 }
 

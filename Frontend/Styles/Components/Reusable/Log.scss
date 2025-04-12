@@ -13,6 +13,8 @@
 
     align-items: flex-start;
 
+    transition: all $TransitionTime;
+
 }
 
 // Color-Classification
@@ -39,6 +41,12 @@
 
     border-color: rgba(185, 130, 130, 0.5);
 
+}
+
+.InlineItem.Log:hover {
+    
+    filter: brightness(1.05);
+    
 }
 
 // Header/Meta
