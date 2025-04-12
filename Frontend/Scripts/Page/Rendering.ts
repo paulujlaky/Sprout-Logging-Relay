@@ -88,7 +88,7 @@ export function ShowFooterMessage(Mode: "Success" | "Info" | "Error", Message: s
     const LockID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
     $(".Container.DashFooterMessageSection .DashFooterMessageText").html(Message);
-    $(".Container.DashFooterMessageSection").css("display", "flex").attr("NotificationLockID", LockID);
+    $(".Container.DashFooterMessageSection").css("display", "flex").attr("NotificationLockID", LockID).attr("NotificationMode", Mode);
 
     const Icons = {
 

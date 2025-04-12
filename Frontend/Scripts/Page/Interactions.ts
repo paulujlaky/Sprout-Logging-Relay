@@ -26,6 +26,16 @@ const RelevantElements = {
 
     Dialogs: {
 
+        NotificationDialog: $(".NotificationInfoDialog") as JQuery<HTMLDialogElement>,
+
+    },
+
+    Notifications: {
+
+        Icon: $(".DashFooterMessageIcon"),
+        Message: $(".DashFooterMessageText"),
+        Section: $(".Container.DashFooterMessageSection")
+
     },
 
     Selects: {
@@ -52,6 +62,7 @@ export async function WatchPageInteractions(): Promise<void> {
 
     HandleSelectMenuInteractions();
     HandleContextMenuInteractions();
+    WatchForNotificationPopout();
 
     WatchBrandingClick();
 
@@ -62,6 +73,34 @@ export async function WatchPageInteractions(): Promise<void> {
     PopulateServiceSelect(await GetAllServices());
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
+
+}
+
+// Notification Popout
+
+function WatchForNotificationPopout(): void {
+
+    RelevantElements.Notifications.Icon.on("click", async () => {
+
+        // On mobile, only icon is visible, so give user the choice to see more
+
+        const Level = RelevantElements.Notifications.Section.attr("NotificationMode") || "Info"; // shownotification function populates this attr to be used here
+        const Message = RelevantElements.Notifications.Message.text();
+
+        // setting dialog info
+
+        RelevantElements.Dialogs.NotificationDialog.find(".NotificationInfoMode").text(Level);
+        RelevantElements.Dialogs.NotificationDialog.find(".NotificationInfoContent").text(Message); 
+
+        // showing/handling dialog
+        
+        ShowDialog(RelevantElements.Dialogs.NotificationDialog);
+
+        await WaitForDialogResponse(RelevantElements.Dialogs.NotificationDialog);
+
+        HideDialog(RelevantElements.Dialogs.NotificationDialog); 
+
+    });
 
 }
 

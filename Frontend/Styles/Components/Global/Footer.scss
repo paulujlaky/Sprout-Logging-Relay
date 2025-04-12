@@ -18,4 +18,16 @@
 
     font-size: $FontSizeLarge * 1.1;
 
+    cursor: pointer;
+
+}
+
+.DashFooterMessageText {
+
+    @include RespondTo("Mobile") {
+
+        display: none;
+
+    }
+
 }
