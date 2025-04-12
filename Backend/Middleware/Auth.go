@@ -48,7 +48,7 @@ func Authorize() gin.HandlerFunc {
 
 		Account, AuthorizedError := AuthorizeFromRequest(GinContext)
 
-		if AuthorizedError != nil || !(slices.Contains(Account.Flags, "Developer") || slices.Contains(Account.Flags, "CDNAccess")) {
+		if AuthorizedError != nil || !(slices.Contains(Account.Flags, "Developer") || slices.Contains(Account.Flags, "LoggingAccess")) {
 
 			GinContext.JSON(401, Types.Response{
 

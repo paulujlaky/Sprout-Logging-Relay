@@ -61,7 +61,7 @@ func LogIn(GinContext *gin.Context) {
 
 	}
 
-	if !slices.Contains(Account.Flags, "Developer") && !slices.Contains(Account.Flags, "CDNAccess") {
+	if !slices.Contains(Account.Flags, "Developer") && !slices.Contains(Account.Flags, "LoggingAccess") {
 
 		GinContext.JSON(401, Types.Response{
 
