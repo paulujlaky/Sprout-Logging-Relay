@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 
@@ -48,6 +49,8 @@ func LoadConfig() (*Types.Config, error) {
 
 var RouteHandlers = Assets.GetRoutes()
 
+var RouteMutexes = map[string]*sync.Mutex{}
+
 func LoadRoutes(Router *gin.Engine) {
 
 	for Route, Handler := range RouteHandlers {
@@ -59,6 +62,33 @@ func LoadRoutes(Router *gin.Engine) {
 			MiddlewareFuncs = append(MiddlewareFuncs, Middleware.Authorize())
 
 		}
+
+		// Check if the route requires a mutex
+
+		if Handler.UseMutex {
+
+			if _, Exists := RouteMutexes[Route]; !Exists {
+
+				RouteMutexes[Route] = &sync.Mutex{} // Initialize mutex for the route
+
+			}
+			
+			Mutex := RouteMutexes[Route]
+
+			// Wrap the handler with mutex locking
+
+			OriginalHandler := Handler.Handler
+
+			Handler.Handler = func(c *gin.Context) {
+
+				Mutex.Lock()
+				defer Mutex.Unlock()
+				OriginalHandler(c)
+				
+			}
+
+		}
+
 
 		if Handler.RateLimitConfig != nil {
 
