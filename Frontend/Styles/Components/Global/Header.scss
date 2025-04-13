@@ -74,16 +74,16 @@
 
     margin-right: 9rem; // make a bit more "center"
 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     @include RespondTo("Mobile") {
 
         margin-right: 0;
         
     }
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    
 }
 
 .DashHeaderMessageTextLarge {

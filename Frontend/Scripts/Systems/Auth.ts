@@ -33,7 +33,7 @@ export async function Authorize(): Promise<boolean> {
 
     } else {
 
-        window.location.href = "https://sprout.software/Accounts/Login?Redirect=SproutLoggingRelayDev"; // Redirects to sprout login page
+        window.location.href = "https://sprout.software/Accounts/Login?Redirect=SproutLoggingRelay"; // Redirects to sprout login page
         return false;
         
     }
