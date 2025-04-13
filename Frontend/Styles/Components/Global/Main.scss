@@ -90,3 +90,11 @@
     opacity: 0.25;
 
 }
+
+// HOTFIX for embedded code blocks 
+
+pre {
+
+    white-space: normal !important;
+
+}
