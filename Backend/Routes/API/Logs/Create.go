@@ -6,11 +6,18 @@ import (
 	"elucid503/SproutLoggingRelay/Types"
 	"fmt"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CreateLog(GinContext *gin.Context) {
+
+	var RouteMutex sync.Mutex // Mutex to ensure only one request processes at a time
+
+	RouteMutex.Lock() // Lock the mutex to ensure only one request processes at a time
+
+	defer RouteMutex.Unlock() // Unlock the mutex when the function returns
 
 	// Get request body
 
