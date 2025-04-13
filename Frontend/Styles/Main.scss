@@ -70,6 +70,17 @@ body {
 
 }
 
+a {
+
+    color: #dadffd;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+}
+
 // Loading View
 
 .Container.DashLoading {
