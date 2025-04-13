@@ -2,6 +2,7 @@ package Models
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"elucid503/SproutLoggingRelay/Functions"
@@ -20,6 +21,8 @@ type Service struct {
 	Icon        string `json:"Icon"`
 
 	Logs []Log `json:"Logs"`
+
+	LogsMutex sync.Mutex // mutex for thread-safe log updates. NOT to be used for DB updates, and NOT serialized to JSON
 
 	// Internals 
 
@@ -104,6 +107,9 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) (error, *Log) {
 	
+	AssociatedService.LogsMutex.Lock() // lock the mutex for thread-safe in-memory updates
+	defer AssociatedService.LogsMutex.Unlock()
+
 	if (AssociatedService.MaxLogs < len(AssociatedService.Logs)) {
 
 		// we need to remove the oldest log
@@ -131,24 +137,27 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 	NewLog.Content.Features = NewLog.parseRawLogContent() // parse the raw log content into features
 	NewLog.HTML = NewLog.ToHTML(AssociatedService) // convert the log to HTML
 
-	AssociatedService.Logs = append(AssociatedService.Logs, NewLog) 
+	// Update in-memory logs
 
-	// Update in DB 
+	AssociatedService.Logs = append(AssociatedService.Logs, NewLog)
 
+	if len(AssociatedService.Logs) > AssociatedService.MaxLogs {
+
+		AssociatedService.Logs = AssociatedService.Logs[1:] // trim oldest log
+
+	}
+
+	// Update in DB atomically
+	
 	_, WriteError := Misc.Database.Collection("Services").UpdateOne(
 		context.TODO(),
-
 		gin.H{"uid": AssociatedService.UID},
-
 		gin.H{
-
 			"$push": gin.H{"logs": gin.H{
-				"$each": []Log{NewLog}, // add the new log
-				"$slice": -AssociatedService.MaxLogs, // ensure the logs array doesn't exceed MaxLogs
+				"$each": []Log{NewLog},
+				"$slice": -AssociatedService.MaxLogs, // ensure logs array doesn't exceed MaxLogs
 			}},
-
 		},
-		
 	)
 
 	return WriteError, &NewLog // return the new log and any errors that occurred
