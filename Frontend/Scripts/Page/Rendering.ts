@@ -472,6 +472,8 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
 
+    UpdateLogStatsFromAppendedLog(Log); // update the log stats
+
     if (!IsScrolledUp) { // if the user is not scrolled up
 
         document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
@@ -503,6 +505,21 @@ export function UpdateUIWithService(Service: Service): void {
 
     const Warnings = Service.Logs.filter((Log) => Log.Level == LogLevel.Warning).length; // get the warning count
     const Errors = Service.Logs.filter((Log) => Log.Level == LogLevel.Error).length; // get the error count
+
+    RelevantElements.States.CurrentService.LogStats.Warnings.text(`${Warnings} ${PluralizeWord(Warnings, "Warning", "Warnings")}`); // update the warning count
+    RelevantElements.States.CurrentService.LogStats.Errors.text(`${Errors} ${PluralizeWord(Errors, "Error", "Errors")}`); // update the error count
+
+}
+
+export function UpdateLogStatsFromAppendedLog(Log: ServiceLog): void {
+
+    const CurrentWarnings = RelevantElements.States.CurrentService.LogStats.Warnings.text(); // get the current warning count
+    const CurrentErrors = RelevantElements.States.CurrentService.LogStats.Errors.text(); // get the current error count
+
+    // Incremeent the count
+
+    const Warnings = parseInt(CurrentWarnings.split(" ")[0]) + (Log.Level == LogLevel.Warning ? 1 : 0); // get the new warning count
+    const Errors = parseInt(CurrentErrors.split(" ")[0]) + (Log.Level == LogLevel.Error ? 1 : 0); // get the new error count
 
     RelevantElements.States.CurrentService.LogStats.Warnings.text(`${Warnings} ${PluralizeWord(Warnings, "Warning", "Warnings")}`); // update the warning count
     RelevantElements.States.CurrentService.LogStats.Errors.text(`${Errors} ${PluralizeWord(Errors, "Error", "Errors")}`); // update the error count
