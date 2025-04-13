@@ -357,41 +357,9 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
 
     }
 
-    const HTML = Service.Logs.map((Log) => Log.HTML);
-
-    // Add a "New Service" seperator between each group of logs from each service
-
-    for (let i = 0; i < Service.Logs.length; i++) {
-
-        const Log = Service.Logs[i]; // get the log
-
-        if (i == 0 && GlobalStorage.CurrentService.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
-
-            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
-
-            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
-
-            HTML.splice(0, 0, Seperator); // insert the seperator at the start of the logs
-
-        }
-
-        const NextLog = Service.Logs[i + 1]; // get the next log
-
-        if (!NextLog) break; // if there is no next log, break
-
-        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
-
-            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
-
-            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
-
-            HTML.splice(i + 1, 0, Seperator); // insert the seperator at the current index. we know i+1 exists, but in general this is a little unsafe
-
-        }
-
-    }
-
-    RelevantElements.Containers.Logs.html(HTML.join("")); // join the logs and set the HTML
+    const Rendered = await AddSeperatorsAndRenderLogs(Service.Logs); // render the logs
+    
+    RelevantElements.Containers.Logs.html(Rendered); // render the logs
 
     // Scroll to the bottom, which will be the most recent logs
 
@@ -401,6 +369,48 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
         behavior: SmoothScroll ? "smooth" : "instant"
 
     });
+
+}
+
+export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
+
+    const Result: string[] = []; // create an array to store the logs
+
+    // Add a "New Service" seperator between each group of logs from each service
+
+    for (let i = 0; i < RawLogs.length; i++) {
+
+        const Log = RawLogs[i]; // get the log
+
+        if (i == 0 && GlobalStorage.CurrentService?.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
+
+            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
+
+            const Seperator = `<div class="ServiceLogsSeparator" style="margin-top: 0.25rem;"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
+
+            Result.push(Seperator); // add the seperator to the result
+
+        }
+
+        Log.HTML && Result.push(Log.HTML); // add the log to the result
+
+        const NextLog = RawLogs[i + 1]; // get the next log
+
+        if (!NextLog) break; // done
+
+        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
+
+            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
+
+            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
+
+            Result.push(Seperator); // add the seperator to the result
+            
+        }
+
+    }
+
+    return Result.join(""); // join the logs and return the HTML
 
 }
 
@@ -431,6 +441,21 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
     }
 
     const IsScrolledUp = IsUserScrolledUp(250); // check if the user is scrolled up
+
+    // Check if the log is from a new service than the last. if so, we must add a seperator
+
+    const LastLog = RelevantElements.Containers.Logs.find(".InlineItem.Log").last(); // get the last log
+
+    const LastLogServiceUID = LastLog.attr("ServiceUID"); // get the last log service UID
+    const ThisLogService = await GetService(FromServiceUID); // get the service from the UID
+
+    if (LastLogServiceUID != FromServiceUID) { // if the service UID is different
+
+        const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${ThisLogService?.Name || GlobalStorage.CurrentService?.Name || "Unknown"}<div class="Line"></div></div>` // create the seperator
+
+        LastLog.after(Seperator); // insert the seperator after the last log
+
+    }
 
     RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
 

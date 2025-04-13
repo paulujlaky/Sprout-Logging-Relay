@@ -246,7 +246,7 @@ func (Log *Log) ToHTML(RelatedService *Service) string {
 
 	return fmt.Sprintf(`
 
-	<div class="InlineItem Log %s">
+	<div class="InlineItem Log %s" ServiceUID="%s">
 
 		<div class="LogMeta">
 
@@ -304,7 +304,7 @@ func (Log *Log) ToHTML(RelatedService *Service) string {
 
 		</div>
 
-	</div>`, StringLevel, RelatedService.Name, StringLevel, 
+	</div>`, StringLevel, RelatedService.UID, RelatedService.Name, StringLevel, 
 	
 	time.Unix(Log.Created, 0).Format("Jan 2, 2006"), 
 	time.Unix(Log.Created, 0).Format("3:04 PM"),
