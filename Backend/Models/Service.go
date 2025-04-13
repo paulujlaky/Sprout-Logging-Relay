@@ -135,7 +135,21 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	// Update in DB 
 
-	_, WriteError := Misc.Database.Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
+	_, WriteError := Misc.Database.Collection("Services").UpdateOne(
+		context.TODO(),
+
+		gin.H{"uid": AssociatedService.UID},
+
+		gin.H{
+
+			"$push": gin.H{"logs": gin.H{
+				"$each": []Log{NewLog}, // add the new log
+				"$slice": -AssociatedService.MaxLogs, // ensure the logs array doesn't exceed MaxLogs
+			}},
+
+		},
+		
+	)
 
 	return WriteError, &NewLog // return the new log and any errors that occurred
 
