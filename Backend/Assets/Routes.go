@@ -25,10 +25,6 @@ type RouteInfo struct {
 	RateLimitConfig *Middleware.RouteRateLimitConfig
 	Authorized      bool
 
-	// Other 
-
-	UseMutex bool 
-
 }
 
 func GetRoutes() map[string]RouteInfo {
@@ -124,8 +120,6 @@ func GetRoutes() map[string]RouteInfo {
 			},
 
 			Authorized:false, // services must be able to call this route programmatically
-
-			UseMutex: true,
 
 		},
 
