@@ -1,11 +1,13 @@
 import $ from "jquery";
 
+import { GlobalStorage } from "../Main";
+
+import { GetService } from "../Internals/Calls";
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
 import { IsUserScrolledUp, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+
 import { Log, PluralizeWord } from "../Misc/Utils";
-import { GlobalStorage } from "../Main";
-import { GetService } from "../Internals/Calls";
 
 const RelevantElements = {
 
@@ -61,6 +63,11 @@ const RelevantElements = {
     CtxMenu: $(".DashContextMenu")
 
 }
+
+// For a state-fix
+
+let LastLogAddedTime: number = 0;
+let WasUserScrolledUp: boolean = false;
 
 // Loading
 
@@ -416,6 +423,8 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise
 
 export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, FromSocket: boolean = false): Promise<void> {
 
+    LastLogAddedTime = Date.now(); // set the last log added time
+
     const ShowAsNotificationInstead = async () => {
 
         const FromService = await GetService(FromServiceUID); // get the service from the UID
@@ -439,8 +448,12 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
         RelevantElements.Containers.Start.hide(); // hide the start message
         
     }
+    
+    const IsScrollResultWrong = WasUserScrolledUp && (Date.now() - LastLogAddedTime) < 1_000 // if the last log was added in less than 100ms, we can assume that it's ideal to keep scrolling down
+    
+    const IsScrolledUp = IsScrollResultWrong ? IsScrollResultWrong : IsUserScrolledUp(500); // check if the user is scrolled up. overriden by if it was wrong
 
-    const IsScrolledUp = IsUserScrolledUp(250); // check if the user is scrolled up
+    WasUserScrolledUp = IsScrolledUp; // for later
 
     // Check if the log is from a new service than the last. if so, we must add a seperator
 
