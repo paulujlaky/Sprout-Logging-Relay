@@ -87,6 +87,8 @@ interface LogContent {
 
 export interface ServiceLog {
 
+    ParentServiceUID: string;
+
     Level: LogLevel;
 
     Content: LogContent;

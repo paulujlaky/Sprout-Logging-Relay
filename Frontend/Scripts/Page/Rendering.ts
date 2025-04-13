@@ -334,7 +334,7 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 
 // Service State
 
-export function SwitchToService(Service: Service, SmoothScroll: boolean = false): void {
+export async function SwitchToService(Service: Service, SmoothScroll: boolean = false): Promise<void> {
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
 
@@ -357,9 +357,41 @@ export function SwitchToService(Service: Service, SmoothScroll: boolean = false)
 
     }
 
-    const HTML = Service.Logs.map((Log) => Log.HTML).join("");
+    const HTML = Service.Logs.map((Log) => Log.HTML);
 
-    RelevantElements.Containers.Logs.html(HTML); // update the main panel with the new logs
+    // Add a "New Service" seperator between each group of logs from each service
+
+    for (let i = 0; i < Service.Logs.length; i++) {
+
+        const Log = Service.Logs[i]; // get the log
+
+        if (i == 0 && GlobalStorage.CurrentService.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
+
+            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
+
+            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
+
+            HTML.splice(0, 0, Seperator); // insert the seperator at the start of the logs
+
+        }
+
+        const NextLog = Service.Logs[i + 1]; // get the next log
+
+        if (!NextLog) break; // if there is no next log, break
+
+        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
+
+            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
+
+            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
+
+            HTML.splice(i + 1, 0, Seperator); // insert the seperator at the current index. we know i+1 exists, but in general this is a little unsafe
+
+        }
+
+    }
+
+    RelevantElements.Containers.Logs.html(HTML.join("")); // join the logs and set the HTML
 
     // Scroll to the bottom, which will be the most recent logs
 

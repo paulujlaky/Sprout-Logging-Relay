@@ -114,6 +114,8 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	NewLog := Log{
 
+		ParentServiceUID: AssociatedService.UID, 
+
 		Level: Level,
 
 		Content: LogContent{

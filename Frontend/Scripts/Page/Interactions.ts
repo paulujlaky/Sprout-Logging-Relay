@@ -3,6 +3,7 @@ import $ from 'jquery';
 import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, GetAllServices, GetService } from '../Internals/Calls';
 import { GlobalStorage } from '../Main';
+import type { Service } from '../Misc/Structs';
 
 const RelevantElements = {
 
@@ -54,7 +55,7 @@ const RelevantElements = {
 
 // General Caller
 
-export async function WatchPageInteractions(): Promise<void> {
+export async function WatchPageInteractions(AllServices: Service[]): Promise<void> {
 
     // Watchers
 
@@ -70,7 +71,7 @@ export async function WatchPageInteractions(): Promise<void> {
     WatchForReloadBtn();
     WatchForCreateService();
 
-    PopulateServiceSelect(await GetAllServices());
+    PopulateServiceSelect(AllServices); // Populate the service select menu with all services
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
 

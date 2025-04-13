@@ -15,6 +15,7 @@ const (
 	LogLevelInfo    LogLevel = 0
 	LogLevelWarning LogLevel = 1
 	LogLevelError   LogLevel = 2
+
 )
 
 type LogFeatureType string
@@ -121,6 +122,8 @@ type LogContent struct {
 }
 
 type Log struct {
+
+	ParentServiceUID string `json:"ParentServiceUID"`
 
 	Level LogLevel `json:"Level"`
 

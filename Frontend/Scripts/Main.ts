@@ -5,7 +5,7 @@ import { Authorize } from "./Systems/Auth";
 import { AppendLogToUI, HideLoadingView, SwitchToService } from "./Page/Rendering";
 import { WatchPageInteractions } from "./Page/Interactions";
 
-import { GetService, WatchForLogs } from "./Internals/Calls";
+import { GetAllServices, GetService, WatchForLogs } from "./Internals/Calls";
 import { Log } from "./Misc/Utils";
 
 export const GlobalStorage: Storage = {
@@ -32,11 +32,13 @@ if (IsAuthed) {
 
     HideLoadingView();
 
-    WatchPageInteractions();
+    const AllServices = await GetAllServices();
 
-    const AllServices = await GetService("All", true);
+    WatchPageInteractions(AllServices); // Watch for page interactions
+
+    const ConglomorateService = await GetService("All", true); // Get all services with logs
     
-    AllServices ? SwitchToService(AllServices) : null;
+    ConglomorateService ? SwitchToService(ConglomorateService) : null;
 
     // Watch for new logs
 
