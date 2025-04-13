@@ -63,32 +63,32 @@ func LoadRoutes(Router *gin.Engine) {
 
 		}
 
+		FinalHandler := Handler.Handler
+
 		// Check if the route requires a mutex
 
 		if Handler.UseMutex {
 
 			if _, Exists := RouteMutexes[Route]; !Exists {
 
-				RouteMutexes[Route] = &sync.Mutex{} // Initialize mutex for the route
+				RouteMutexes[Route] = &sync.Mutex{}
 
 			}
-			
+
 			Mutex := RouteMutexes[Route]
 
-			// Wrap the handler with mutex locking
 
-			OriginalHandler := Handler.Handler
+			OriginalHandler := FinalHandler
 
-			Handler.Handler = func(c *gin.Context) {
+			FinalHandler = func(c *gin.Context) {
 
 				Mutex.Lock()
 				defer Mutex.Unlock()
 				OriginalHandler(c)
-				
+
 			}
 
 		}
-
 
 		if Handler.RateLimitConfig != nil {
 
@@ -96,12 +96,12 @@ func LoadRoutes(Router *gin.Engine) {
 
 		}
 
-		MiddlewareFuncs = append(MiddlewareFuncs, Handler.Handler)
+		MiddlewareFuncs = append(MiddlewareFuncs, FinalHandler) // Use wrapped handler
 
 		Router.Handle(Handler.Method, Route, MiddlewareFuncs...)
 
 	}
-
+	
 }
 
 func main() {
