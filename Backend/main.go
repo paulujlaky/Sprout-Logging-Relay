@@ -116,4 +116,14 @@ func main() {
 
 	GinRouter.Run(fmt.Sprintf(":%d", Config.Server.Port))
 
+	// Keep thread alive
+
+	select {
+
+		case <-make(chan struct{}): 
+	
+		// Block forever
+
+	} // Block forever
+
 }
