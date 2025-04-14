@@ -30,9 +30,9 @@ const IsAuthed = await Authorize();
 
 if (IsAuthed) {
 
-    HideLoadingView();
-
     const AllServices = await GetAllServices();
+
+    HideLoadingView();
 
     WatchPageInteractions(AllServices); // Watch for page interactions
 
