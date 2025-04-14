@@ -222,7 +222,7 @@ export function WatchForLogViewScroll(): void {
 
             const NewOffset = LastOffset + LastLimit; // increment the offset by the limit
 
-            Log("Info", `User scrolling more logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
+            Log("Info", `Scroll detected; requesting additional logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
 
             const Service = await GetService(CurrentService.UID);
 
