@@ -374,7 +374,7 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
 
 }
 
-export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
+export async function AddSeperatorsAndRenderLogs(RawLogs: string[]): Promise<string> {
 
     const Result: string[] = []; // create an array to store the logs
 
@@ -384,9 +384,15 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise
 
         const Log = RawLogs[i]; // get the log
 
+        const HTMLParseableLog = $.parseHTML(Log); // parse the log
+        const NextParseableLog = $.parseHTML(RawLogs[i + 1]); // parse the next log
+
+        const LogServiceUID = $(HTMLParseableLog).filter(".InlineItem.Log").attr("serviceuid") || "All";
+        const NextLogServiceUID = $(NextParseableLog).filter(".InlineItem.Log").attr("serviceuid") || "All"; // get the next log service UID
+
         if (i == 0 && GlobalStorage.CurrentService?.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
 
-            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
+            const FirstService = await GetService(LogServiceUID); // get the first service
 
             const Seperator = `<div class="ServiceLogsSeparator" style="margin-top: 0.25rem;"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
 
@@ -394,15 +400,15 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise
 
         }
 
-        Log.HTML && Result.push(Log.HTML); // add the log to the result
+        Result.push(Log);
 
         const NextLog = RawLogs[i + 1]; // get the next log
 
         if (!NextLog) break; // done
 
-        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
+        if (LogServiceUID != NextLogServiceUID) { // if the service UID is different
 
-            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
+            const NextService = await GetService(NextLogServiceUID); // get the next service
 
             const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
 
@@ -440,7 +446,7 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     const LastLog = RelevantElements.Containers.Logs.find(".InlineItem.Log").last(); // get the last log
 
-    const LastLogServiceUID = LastLog.attr("ServiceUID"); // get the last log service UID
+    const LastLogServiceUID = LastLog.filter(".InlineItem.Log").attr("serviceuid"); // get the last log service UID
     const ThisLogService = await GetService(FromServiceUID); // get the service from the UID
 
     if (LastLogServiceUID != FromServiceUID) { // if the service UID is different
@@ -480,8 +486,22 @@ export function UpdateUIWithService(Service: Service): void {
 
     RelevantElements.States.CurrentService.Label.text(Service.Name); // update the label with the service name
 
-    const Warnings = Service.Logs.filter((Log) => Log.Level == LogLevel.Warning).length; // get the warning count
-    const Errors = Service.Logs.filter((Log) => Log.Level == LogLevel.Error).length; // get the error count
+    let Warnings = 0, Errors = 0; // create the warning and error counts
+
+    Service.Logs.filter((Log) => {
+
+        const ParseableLog = $.parseHTML(Log); // parse the log
+
+        if ($(ParseableLog).hasClass("Warning")) { // if the log is a warning
+
+            Warnings++; // increment the warning count  
+
+        } else if ($(ParseableLog).hasClass("Error")) { // if the log is an error
+
+            Errors++; // increment the error count
+        }
+
+    })
 
     RelevantElements.States.CurrentService.LogStats.Warnings.text(`${Warnings} ${PluralizeWord(Warnings, "Warning", "Warnings")}`); // update the warning count
     RelevantElements.States.CurrentService.LogStats.Errors.text(`${Errors} ${PluralizeWord(Errors, "Error", "Errors")}`); // update the error count

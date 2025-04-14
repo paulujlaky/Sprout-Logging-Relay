@@ -57,10 +57,18 @@ func ViewLogs(GinContext *gin.Context) {
 		
 	})
 
+	AllLogsHTMLArr := make([]string, len(AllLogs))
+
+	for i, Log := range AllLogs {
+
+		AllLogsHTMLArr[i] = Log.HTML
+
+	}
+
 	GinContext.JSON(200, Types.Response{
 
 		Message: fmt.Sprintf("Successfully retrieved %d %s", len(AllLogs), Functions.PluralizeString(len(AllLogs), "log")),
-		JSON: AllLogs,
+		JSON: AllLogsHTMLArr,
 
 	});
 

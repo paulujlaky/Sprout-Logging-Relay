@@ -107,7 +107,7 @@ export interface Service {
     Description: string;
     Icon: string;
 
-    Logs: ServiceLog[];
+    Logs: string[];
 
     MaxLogs: number;
 

@@ -67,7 +67,7 @@ export async function GetService(ServiceUID: string, ReturnLogs: boolean = false
 
             Description: "N/A",
 
-            Logs: ReturnLogs ? await GetAllLogs() : [], // Get all logs if requested
+            Logs: ReturnLogs ? await GetAllLogsHTML() : [], // Get all logs if requested
 
             MaxLogs: 0, // Not applicable for all services
 
@@ -106,7 +106,7 @@ export async function GetService(ServiceUID: string, ReturnLogs: boolean = false
 
 // Logs
 
-export async function GetServiceLogs(ServiceUID: string): Promise<ServiceLog[]> {
+export async function GetServiceLogs(ServiceUID: string): Promise<string[]> {
 
     // Get all logs for a service
 
@@ -118,11 +118,11 @@ export async function GetServiceLogs(ServiceUID: string): Promise<ServiceLog[]> 
 
     }
 
-    return Response.JSON as ServiceLog[]; // Will automatically be sorted by most recent
+    return Response.JSON as string[]; // Will automatically be sorted by most recent
 
 }
 
-export async function GetAllLogs(): Promise<ServiceLog[]> {
+export async function GetAllLogsHTML(): Promise<string[]> {
 
     const Response = await MakeRequest(Routes.ViewLogs);
 
@@ -132,7 +132,7 @@ export async function GetAllLogs(): Promise<ServiceLog[]> {
 
     }
 
-    return Response.JSON as ServiceLog[]; // Will automatically be sorted by most recent
+    return Response.JSON as string[]; // Will automatically be sorted by most recent
 
 }
 

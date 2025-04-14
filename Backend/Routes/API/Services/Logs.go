@@ -45,10 +45,18 @@ func ViewServiceSpecificLogs(GinContext *gin.Context) {
 
 	}
 
+	AllLogsHTMLArr := make([]string, len(Service.Logs))
+
+	for i, Log := range Service.Logs {
+
+		AllLogsHTMLArr[i] = Log.HTML
+
+	}
+
 	GinContext.JSON(200, Types.Response{
 
 		Message: fmt.Sprintf("Successfully retrieved %d %s", len(Service.Logs), Functions.PluralizeString(len(Service.Logs), "log")),
-		JSON: Service.Logs,
+		JSON: AllLogsHTMLArr,
 
 	});
 
