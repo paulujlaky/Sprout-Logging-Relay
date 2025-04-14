@@ -202,9 +202,22 @@ function WatchForCreateService(): void {
 
 // Logs View
 
+function Debounce(Func: (...Args: any[]) => void, Delay: number): (...Args: any[]) => void {
+
+    let Timeout: number | undefined;
+
+    return (...Args: any[]) => {
+
+        clearTimeout(Timeout);
+        Timeout = window.setTimeout(() => Func(...Args), Delay);
+
+    };
+
+}
+
 export function WatchForLogViewScroll(): void {
 
-    document?.addEventListener("scroll", async () => {
+    const HandleScroll = Debounce(async () => {
 
         if ((document.scrollingElement?.scrollTop || 0) < 100) { // 100px from the top will trigger new logs
 
@@ -224,10 +237,8 @@ export function WatchForLogViewScroll(): void {
             const Service = await GetService(CurrentService.UID);
 
             if (!Service) {
-                
                 GlobalStorage.States.Pagination.IsMakingRequests = false; 
                 return;
-
             } 
 
             const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); 
@@ -235,16 +246,15 @@ export function WatchForLogViewScroll(): void {
             AppendLogsOnTop(NewLogs);
 
             // Set vars
-
             GlobalStorage.States.Pagination.IsMakingRequests = false; // set the flag to false
             GlobalStorage.States.Pagination.LastOffset = NewOffset; 
-
             GlobalStorage.States.Pagination.IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
-            
         }
 
-    });
+    }, 200); // 200ms debounce
 
+    document?.addEventListener("scroll", HandleScroll);
+    
 }
 
 // Reload Button
