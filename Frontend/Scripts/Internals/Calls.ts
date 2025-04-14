@@ -142,7 +142,7 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
     const WatchLogsRouteURL = Routes.WatchForLogs.Path;
     
-    const WebSocketInstance = new WebSocket(WatchLogsRouteURL);
+    let WebSocketInstance = new WebSocket(WatchLogsRouteURL);
 
     // Some default handlers for open/close/err events 
 
@@ -206,6 +206,27 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
         }
 
     }, 30_000); // 30 seconds
+
+    setInterval(() => {
+
+        // Check if websocket is open, and if not, reconnect
+
+        if (WebSocketInstance.readyState == WebSocket.CLOSED) {
+
+            Log("Error", "Detected disconnection from logs websocket. Attempting to reconnect.");
+
+            const NewWebSocket = new WebSocket(WatchLogsRouteURL); // Attempt to reconnect
+
+            NewWebSocket.onopen = () => {
+
+                Log("Info", "Reconnected to logs websocket.");
+                WebSocketInstance = NewWebSocket; // Set the new websocket instance
+
+            }
+
+        }
+
+    }, 5_000);
 
 }
 

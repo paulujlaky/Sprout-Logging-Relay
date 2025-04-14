@@ -64,6 +64,7 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
     HandleSelectMenuInteractions();
     HandleContextMenuInteractions();
     WatchForNotificationPopout();
+    WatchForWindowRefocus(); 
 
     WatchBrandingClick();
 
@@ -75,6 +76,29 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
 
+}
+
+// Window Refocus Listener
+
+function WatchForWindowRefocus(): void {
+
+    // Reload logs since websocket might have been disconnected
+
+    document.addEventListener("visibilitychange", () => {
+
+        if (document.visibilityState === "visible") { // If the window is visible, reload the logs
+
+            const CurrentService = GlobalStorage.CurrentService; // Get the current service
+
+            if (CurrentService) { // If there is a current service, reload it
+
+                SwitchToService(CurrentService); // Reload the service
+
+            }
+
+        }
+    });
+    
 }
 
 // Notification Popout
