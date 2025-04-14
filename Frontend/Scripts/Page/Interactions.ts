@@ -84,15 +84,17 @@ function WatchForWindowRefocus(): void {
 
     // Reload logs since websocket might have been disconnected
 
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener("visibilitychange", async () => {
 
         if (document.visibilityState === "visible") { // If the window is visible, reload the logs
 
             const CurrentService = GlobalStorage.CurrentService; // Get the current service
 
-            if (CurrentService) { // If there is a current service, reload it
+            const Refreshed = await GetService(CurrentService?.UID || "All", true);
 
-                SwitchToService(CurrentService); // Reload the service
+            if (Refreshed) { // If there is a current service, reload it
+
+                SwitchToService(Refreshed, true); // Switch to the refreshed service (with scroll)
 
             }
 
@@ -199,7 +201,9 @@ async function WatchForReloadBtn(): Promise<void> {
 
     RelevantElements.Buttons.ReloadBtn.on("click", async () => {
 
-        GlobalStorage.CurrentService && SwitchToService(GlobalStorage.CurrentService, true); // Smooth scroll for some fun
+        const Refreshed = await GetService(GlobalStorage.CurrentService?.UID || "All", true); // get the service (AND its logs) from the backend
+
+        Refreshed && SwitchToService(Refreshed, true); // Smooth scroll for some fun
         
     });
 
