@@ -5,7 +5,7 @@ import { GlobalStorage } from "../Main";
 import { GetService } from "../Internals/Calls";
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
-import { IsUserScrolledUp, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+import { IsElementInViewport, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 
 import { Log, PluralizeWord } from "../Misc/Utils";
 
@@ -63,11 +63,6 @@ const RelevantElements = {
     CtxMenu: $(".DashContextMenu")
 
 }
-
-// For a state-fix
-
-let LastLogAddedTime: number = 0;
-let WasUserScrolledUp: boolean = false;
 
 // Loading
 
@@ -423,19 +418,11 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise
 
 export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, FromSocket: boolean = false): Promise<void> {
 
-    LastLogAddedTime = Date.now(); // set the last log added time
-
-    const ShowAsNotificationInstead = async () => {
+    if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
 
         const FromService = await GetService(FromServiceUID); // get the service from the UID
 
         FromService && ShowNewLogNotification(FromService); // show the notification (we know the service will be the current one)
-
-    }
-
-    if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
-
-        return ShowAsNotificationInstead(); // UID mismatch, so show the notification instead
 
     }
 
@@ -448,12 +435,6 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
         RelevantElements.Containers.Start.hide(); // hide the start message
         
     }
-    
-    const IsScrollResultWrong = WasUserScrolledUp && (Date.now() - LastLogAddedTime) < 1_000 // if the last log was added in less than 100ms, we can assume that it's ideal to keep scrolling down
-    
-    const IsScrolledUp = IsScrollResultWrong ? IsScrollResultWrong : IsUserScrolledUp(500); // check if the user is scrolled up. overriden by if it was wrong
-
-    WasUserScrolledUp = IsScrolledUp; // for later
 
     // Check if the log is from a new service than the last. if so, we must add a seperator
 
@@ -474,8 +455,10 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     UpdateLogStatsFromAppendedLog(Log); // update the log stats
 
-    if (!IsScrolledUp) { // if the user is not scrolled up
+    // we'll only scroll if the user is at the bottom of the logs 
 
+    if (IsElementInViewport(LastLog)) {
+    
         document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
             top: document.scrollingElement.scrollHeight,
@@ -483,14 +466,8 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
         });
         
-    } else {
-
-        // Just show notification
-
-        ShowAsNotificationInstead();
-        
     }
-
+        
 }
 
 export function ShowNewLogNotification(Service: Service): void {

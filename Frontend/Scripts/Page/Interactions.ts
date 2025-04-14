@@ -327,16 +327,11 @@ export function RemoveDialogOnEscape(Dialog: JQuery<HTMLDialogElement>): void {
 
 }
 
-export function IsUserScrolledUp(Threshold: number = 0): boolean {
+export function IsElementInViewport(Element: JQuery<HTMLElement>): boolean {
 
-    // Threshold will be number of pixels from the *bottom* of the page
+    const Rect = Element[0].getBoundingClientRect(); // get the bounding rect of the element
 
-    const ScrollMax = ($(document).height() || 0) - ($(window).height() || 0); // get the max scroll height
-    const ScrollTop = $(window).scrollTop() || 0; // get the current scroll position
-
-    const ScrollBottom = ScrollMax - ScrollTop; // get the scroll position from the bottom
-
-    return (ScrollBottom >= Threshold); // return true if the scroll position is less than or equal to the threshold
+    return (Rect.top >= 0 && Rect.left >= 0 && Rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && Rect.right <= (window.innerWidth || document.documentElement.clientWidth)); // check if the element is in the viewport
 
 }
 

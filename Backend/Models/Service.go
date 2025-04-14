@@ -44,7 +44,7 @@ func NewService(Name string, Description string, Icon string) Service {
 
 		Logs:        []Log{},
 
-		MaxLogs:     500, // default max logs to keep before overwriting. eventually might be configurable by user
+		MaxLogs:     250, // default max logs to keep before overwriting. eventually might be configurable by user
 
 	}
 	
