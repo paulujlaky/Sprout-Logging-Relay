@@ -8,8 +8,6 @@
 
     z-index: 5;
 
-    border-bottom: $Border;
-
     @include OverlayedBar();
     
 }
@@ -22,6 +20,12 @@
     border-bottom: none;
     border-top: $Border;
     
+}
+
+.Container.DashHeader {
+
+    border-bottom: $Border;
+
 }
 
 // Branding (Leftmost)
