@@ -149,14 +149,6 @@ SelectMenuOptions {
     // Must be last to override Container mixin 
 
     display: none;
-
-    @include RespondTo("Mobile") {
-
-        background-color: #1b1b1b;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        
-    }
     
 }
 
