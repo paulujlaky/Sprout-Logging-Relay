@@ -121,61 +121,67 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
     const WatchLogsRouteURL = Routes.WatchForLogs.Path;
     
-    let WebSocketInstance = new WebSocket(WatchLogsRouteURL);
+    let WebSocketInst = new WebSocket(WatchLogsRouteURL);
 
-    // Some default handlers for open/close/err events 
+    // Some default handlers for open/close/err events
 
-    WebSocketInstance.onopen = () => Log("Info", "Connected to logs websocket.");
-    WebSocketInstance.onclose = () => Log("Error", "Disconnected from logs websocket.");
-    WebSocketInstance.onerror = () => Log("Error", "Error in logs websocket.");
+    const BindListeners = (WebSocketInstance: WebSocket) => {
 
-    WebSocketInstance.onmessage = (MsgEvent: MessageEvent) => {
+        WebSocketInstance.onopen = () => Log("Info", "Connected to logs websocket.");
+        WebSocketInstance.onclose = () => Log("Error", "Disconnected from logs websocket.");
+        WebSocketInstance.onerror = () => Log("Error", "Error in logs websocket.");
 
-        const Data = MsgEvent.data;
+        WebSocketInstance.onmessage = (MsgEvent: MessageEvent) => {
 
-        if (Data == "Ping") {
+            const Data = MsgEvent.data;
 
-            // Our crappy ping/pong system. For now, we handle it seperately.
+            if (Data == "Ping") {
 
-            return WebSocketInstance.send("Pong");
+                // Our crappy ping/pong system. For now, we handle it seperately.
+
+                return WebSocketInstance.send("Pong");
+
+            }
+
+            let ParsedData = null;
+
+            try {
+
+                ParsedData = JSON.parse(Data);
+
+            } catch (Err) {
+
+                // Was more likely than not just a ping/pong message, so we can ignore it safely
+                return;
+
+            }
+
+            if (!ParsedData || !ParsedData.JSON?.ServiceUID) {
+
+                return; // May not be related data for a new log
+
+            }
+
+            ParsedData = ParsedData.JSON as {
+
+                ServiceUID: string;
+                Log: ServiceLog;
+
+            }
+
+            NewLogCallback(ParsedData.ServiceUID, ParsedData.Log); // Call the callback with the new log. here, the cb will run as many times as the logs are received
 
         }
-
-        let ParsedData = null;
-
-        try {
-
-            ParsedData = JSON.parse(Data);
-
-        } catch (Err) {
-
-            // Was more likely than not just a ping/pong message, so we can ignore it safely
-            return;
-
-        }
-
-        if (!ParsedData || !ParsedData.JSON?.ServiceUID) {
-
-            return; // May not be related data for a new log
-
-        }
-
-        ParsedData = ParsedData.JSON as {
-
-            ServiceUID: string;
-            Log: ServiceLog;
-
-        }
-
-        NewLogCallback(ParsedData.ServiceUID, ParsedData.Log); // Call the callback with the new log. here, the cb will run as many times as the logs are received
-
+        
     }
+
+    BindListeners(WebSocketInst); // Bind the listeners to the initial instance
 
     setInterval(() => {
 
-        if (WebSocketInstance.readyState == WebSocket.OPEN) {
+        if (WebSocketInst.readyState == WebSocket.OPEN) {
 
-            WebSocketInstance.send("Ping"); // Send a ping every 5 seconds
+            WebSocketInst.send("Ping"); // Send a ping every 5 seconds
 
         }
 
@@ -185,17 +191,15 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
         // Check if websocket is open, and if not, reconnect
 
-        if (WebSocketInstance.readyState == WebSocket.CLOSED) {
+        if (WebSocketInst.readyState == WebSocket.CLOSED) {
 
             Log("Error", "Detected disconnection from logs websocket. Attempting to reconnect.");
 
-            WebSocketInstance = new WebSocket(WatchLogsRouteURL); // Attempt to reconnect
+            WebSocketInst = new WebSocket(WatchLogsRouteURL); // Recreate the websocket instance
 
-            WebSocketInstance.onopen = () => {
+            // Bind the listeners again
 
-                Log("Info", "Reconnected to logs websocket.");
-
-            }
+            BindListeners(WebSocketInst); // Rebind the listeners
 
         }
 
