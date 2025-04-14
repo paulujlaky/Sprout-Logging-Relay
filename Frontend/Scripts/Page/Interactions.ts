@@ -237,18 +237,26 @@ export function WatchForLogViewScroll(): void {
             const Service = await GetService(CurrentService.UID);
 
             if (!Service) {
+
                 GlobalStorage.States.Pagination.IsMakingRequests = false; 
                 return;
+                
             } 
 
             const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); 
 
+            const CurrentPos = document.scrollingElement?.scrollTop || 0; // get the current scroll position
+
             AppendLogsOnTop(NewLogs);
 
+            document.scrollingElement?.scrollTo({ top: CurrentPos, behavior: "instant" }); // keep the scroll position the same
+
             // Set vars
+
             GlobalStorage.States.Pagination.IsMakingRequests = false; // set the flag to false
             GlobalStorage.States.Pagination.LastOffset = NewOffset; 
             GlobalStorage.States.Pagination.IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
+
         }
 
     }, 200); // 200ms debounce
