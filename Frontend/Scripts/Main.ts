@@ -32,14 +32,15 @@ if (IsAuthed) {
 
     const AllServices = await GetAllServices();
 
-    HideLoadingView();
-
-    Log("Info", "All services loaded, rendering UI");
 
     WatchPageInteractions(AllServices); // Watch for page interactions
 
     const ConglomorateService = await GetService("All", true); // Get all services with logs
-    
+
+    Log("Info", "All services loaded, rendering UI");
+
+    HideLoadingView();
+
     ConglomorateService ? SwitchToService(ConglomorateService) : null;
 
     // Watch for new logs
