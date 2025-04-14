@@ -4,13 +4,13 @@
 
     top: 0; 
 
-    @include OverlayedBar();
-
     height: 5rem;
 
     z-index: 5;
 
     border-bottom: $Border;
+
+    @include OverlayedBar();
     
 }
 
