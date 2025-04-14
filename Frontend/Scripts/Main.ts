@@ -22,6 +22,13 @@ export const GlobalStorage: Storage = {
 
     States: {
         
+        Pagination: {
+            
+            LastOffset: 0,
+            LastLimit: 25,
+
+        }
+        
     }
 
 };
@@ -34,7 +41,7 @@ if (IsAuthed) {
 
     WatchPageInteractions(AllServices); // Watch for page interactions
 
-    const ConglomorateService = await GetService("All", true); // Get all services with logs
+    const ConglomorateService = await GetService("All"); // Get all services with logs
 
     Log("Info", "All services loaded, rendering UI");
 

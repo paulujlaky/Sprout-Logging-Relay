@@ -5,13 +5,18 @@ import (
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func ViewServiceSpecificLogs(GinContext *gin.Context) {
 
-	// Get service 
+	StrOffset := GinContext.Query("Offset")
+	StrLimit := GinContext.Query("Limit")
+
+	IntOffset, _ := strconv.Atoi(StrOffset)
+	IntLimit, _ := strconv.Atoi(StrLimit)
 
 	ServiceUID := GinContext.Param("ServiceUID")
 
@@ -29,34 +34,23 @@ func ViewServiceSpecificLogs(GinContext *gin.Context) {
 
 	}
 
-	Service, ServiceFetchErr := Models.GetServiceByUID(ServiceUID) // TODO: Migrate this to caching, if we're happy with the performance gains
+	ServiceLogs, ServiceLogsFetchErr := Models.ListLogsFromDB(ServiceUID, IntOffset, IntLimit)
 
-	if ServiceFetchErr != nil {
+	if ServiceLogsFetchErr != nil {
 
-		GinContext.JSON(404, Types.Response{
+		GinContext.JSON(500, Types.Response{
 
-			Message: fmt.Sprintf("Service with UID %s not found", ServiceUID),
-
+			Message: "Error fetching logs from database",
 			JSON: nil,
 
 		})
-
-		return
-
-	}
-
-	AllLogsHTMLArr := make([]string, len(Service.Logs))
-
-	for i, Log := range Service.Logs {
-
-		AllLogsHTMLArr[i] = Log.HTML
 
 	}
 
 	GinContext.JSON(200, Types.Response{
 
-		Message: fmt.Sprintf("Successfully retrieved %d %s", len(Service.Logs), Functions.PluralizeString(len(Service.Logs), "log")),
-		JSON: AllLogsHTMLArr,
+		Message: fmt.Sprintf("Successfully retrieved %d %s", len(ServiceLogs), Functions.PluralizeString(len(ServiceLogs), "log")),
+		JSON: ServiceLogs,
 
 	});
 

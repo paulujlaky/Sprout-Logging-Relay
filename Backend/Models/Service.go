@@ -19,8 +19,6 @@ type Service struct {
 	Description string `json:"Description"`
 	Icon        string `json:"Icon"`
 
-	Logs []Log `json:"Logs"`
-
 	// Internals 
 
 	MaxLogs int `json:"MaxLogs"` // max logs to keep before overwriting
@@ -42,8 +40,6 @@ func NewService(Name string, Description string, Icon string) Service {
 		Description: Description,
 		Icon:        Icon,
 
-		Logs:        []Log{},
-
 		MaxLogs:     250, // default max logs to keep before overwriting. eventually might be configurable by user
 
 	}
@@ -54,28 +50,85 @@ func NewService(Name string, Description string, Icon string) Service {
 
 }
 
-func ListServices(WithLogs bool) ([]Service, error) {
+func ListServices() ([]Service, error) {
 
-	var Services []Service = []Service{}
+	var Services []Service
 
-	Options := options.Find()
-
-	if (!WithLogs) { Options.SetProjection(gin.H{"logs": 0}) } // remove logs from the projection 
-
-	DBCursor, Err := Misc.Database.Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
+	Cursor, Err := Misc.Database.Collection("Services").Find(context.TODO(), gin.H{})
 
 	if Err != nil {
 
 		return nil, Err
+		
+	}
+
+	for Cursor.Next(context.TODO()) {
+
+		var Service Service
+
+		Err := Cursor.Decode(&Service)
+
+		if Err != nil {
+
+			return nil, Err
+			
+		}
+
+		Services = append(Services, Service)
 
 	}
 
-	DBCursor.All(context.TODO(), &Services) // unmarshal all entries into Services slice
-
-	DBCursor.Close(context.TODO()) // after reading, free memory
-
 	return Services, nil
+
+}
+
+func ListLogsFromDB(ServiceUID string, Offset int, Limit int) ([]*Log, error) {
+
+	Filter := gin.H{}
+
+	if (ServiceUID != "All") {
 	
+		// We want specific logs from a service
+
+		Filter = gin.H{"ParentServiceUID": ServiceUID}		
+		
+	}
+
+	Options := options.Find()
+
+	Options.SetSort(gin.H{"created": -1}) // sort by created date (newest first)
+	Options.SetSkip(int64(Offset)) // skip the first Offset logs
+	Options.SetLimit(int64(Limit)) // limit the number of logs to Limit
+	Options.SetProjection(gin.H{"_id": 0}) // exclude the _id field from the results
+
+	Cursor, Err := Misc.Database.Collection("Logs").Find(context.TODO(), Filter, Options)
+
+	if Err != nil {
+
+		return nil, Err
+		
+	}
+
+	var Logs []*Log
+
+	for Cursor.Next(context.TODO()) {
+
+		var LogData Log
+
+		Err := Cursor.Decode(&LogData)
+
+		if Err != nil {
+
+			return nil, Err
+			
+		}
+
+		Logs = append(Logs, &LogData)
+
+	}
+
+	return Logs, nil
+
 }
 
 // Getter (From DB)
@@ -98,15 +151,11 @@ func GetServiceByUID(UID string) (*Service, error) {
 
 // Public Funcs
 
-func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) (error, *Log) {
-	
-	if (AssociatedService.MaxLogs < len(AssociatedService.Logs)) {
+func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawContent string) (*Log, error) {
 
-		// we need to remove the oldest log
-
-		AssociatedService.Logs = AssociatedService.Logs[1:] // reassign slice to everything except the first element
-
-	}
+	// RULES:
+	// Logs must be stored in the Logs collection 
+	// Logs for each service cannot exceed Service.MaxLogs 
 
 	NewLog := Log{
 
@@ -127,20 +176,30 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 	NewLog.Content.Features = NewLog.parseRawLogContent() // parse the raw log content into features
 	NewLog.HTML = NewLog.ToHTML(AssociatedService) // convert the log to HTML
 
-	// Update in-memory logs
+	NumberOfLogs, CntError := Misc.Database.Collection("Logs").CountDocuments(context.TODO(), gin.H{"ParentServiceUID": AssociatedService.UID})
 
-	AssociatedService.Logs = append(AssociatedService.Logs, NewLog)
+	if CntError != nil {
 
-	if len(AssociatedService.Logs) > AssociatedService.MaxLogs {
-
-		AssociatedService.Logs = AssociatedService.Logs[1:] // trim oldest log
+		return nil, CntError
 
 	}
 
-	// Update in DB 
+	if NumberOfLogs >= int64(AssociatedService.MaxLogs) {
 
-	_, WriteErr := Misc.Database.Collection("Services").UpdateOne(context.TODO(), gin.H{"uid": AssociatedService.UID}, gin.H{"$set": gin.H{"logs": AssociatedService.Logs}})
+		// delete the oldest log
 
-	return WriteErr, &NewLog // return the new log and any errors that occurred
+		_, DelError := Misc.Database.Collection("Logs").DeleteOne(context.TODO(), gin.H{"ParentServiceUID": AssociatedService.UID})
+
+		if DelError != nil {
+
+			return nil, DelError
+
+		}
+
+	}
+	
+	Misc.Database.Collection("Logs").InsertOne(context.TODO(), NewLog) // insert the log into the database
+
+	return &NewLog, nil // return the log
 
 }

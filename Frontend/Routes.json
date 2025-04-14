@@ -60,22 +60,6 @@
 
     },
 
-    "ViewLogs": {
-
-        "Method": "GET",
-        "Path": "/API/Logs/View",
-
-        "RateLimitConfig": {
-
-            "MaxRequestsAllowed": 180,
-            "TimeWindow": 60
-
-        },
-
-        "Authorized": true
-
-    },
-
     "ViewServiceSpecificLogs": {
 
         "Method": "GET",

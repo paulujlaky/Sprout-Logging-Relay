@@ -54,7 +54,7 @@ export async function GetAllServices(): Promise<Service[]> {
 
 }
 
-export async function GetService(ServiceUID: string, ReturnLogs: boolean = false): Promise<Service | null> {
+export async function GetService(ServiceUID: string): Promise<Service | null> {
 
     if (ServiceUID == "All") {
 
@@ -66,8 +66,6 @@ export async function GetService(ServiceUID: string, ReturnLogs: boolean = false
             Icon: "https://cdn.sprout.software/Files/Sprout/Logos/Sprout.png", 
 
             Description: "N/A",
-
-            Logs: ReturnLogs ? await GetAllLogsHTML() : [], // Get all logs if requested
 
             MaxLogs: 0, // Not applicable for all services
 
@@ -94,23 +92,21 @@ export async function GetService(ServiceUID: string, ReturnLogs: boolean = false
 
     }
 
-    if (ReturnLogs) {
-
-        Service.Logs = await GetServiceLogs(ServiceUID); // Get logs for the service if requested
-
-    }
-
     return Service; // Will automatically be sorted by most recent
 
 }
 
 // Logs
 
-export async function GetServiceLogs(ServiceUID: string): Promise<string[]> {
+export async function GetServiceLogs(ServiceUID: string, Offset: number = 0, Limit: number = 25): Promise<ServiceLog[]> {
 
     // Get all logs for a service
 
-    const Response = await MakeRequest(Routes.ViewServiceSpecificLogs, null, {}, { ServiceUID: ServiceUID });
+    const Route = Routes.ViewServiceSpecificLogs;
+
+    Route.Path += `?Offset=${Offset}&Limit=${Limit}`; // Add offset and limit to the route
+
+    const Response = await MakeRequest(Route, null, {}, { ServiceUID: ServiceUID });
 
     if (!Response || !Response.JSON) {
 
@@ -118,21 +114,7 @@ export async function GetServiceLogs(ServiceUID: string): Promise<string[]> {
 
     }
 
-    return Response.JSON as string[]; // Will automatically be sorted by most recent
-
-}
-
-export async function GetAllLogsHTML(): Promise<string[]> {
-
-    const Response = await MakeRequest(Routes.ViewLogs);
-
-    if (!Response || !Response.JSON) {
-
-        return []; // Same failure case as above
-
-    }
-
-    return Response.JSON as string[]; // Will automatically be sorted by most recent
+    return Response.JSON as ServiceLog[]; // Will automatically be sorted by most recent
 
 }
 

@@ -2,7 +2,7 @@ import $ from "jquery";
 
 import { GlobalStorage } from "../Main";
 
-import { GetService } from "../Internals/Calls";
+import { GetService, GetServiceLogs } from "../Internals/Calls";
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
 import { IsElementInViewport, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
@@ -336,17 +336,25 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 
 // Service State
 
-export async function SwitchToService(Service: Service, SmoothScroll: boolean = false): Promise<void> {
+export async function SwitchToService(Service: Service, OverrideLogs?: ServiceLog[], SmoothScroll: boolean = false, NoScroll: boolean = false): Promise<void> {
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
 
     GlobalStorage.CurrentService = Service; // set the current service in the global storage
+
+    let Logs = OverrideLogs || []; // get the logs from the service
+
+    if (!OverrideLogs) { // if no logs are provided, get the logs from the service
+
+        Logs = await GetServiceLogs(Service.UID); // get the logs for the service
+
+    }
         
-    UpdateUIWithService(Service); // update the UI with the new service
+    UpdateUIWithService(Service, Logs); // update the UI with the new service
 
     // Render the actual logs
 
-    if (Service.Logs.length == 0) {
+    if (Logs.length == 0) {
 
         RelevantElements.Containers.Logs.html(""); // clear the logs
 
@@ -359,22 +367,26 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
 
     }
 
-    const Rendered = await AddSeperatorsAndRenderLogs(Service.Logs); // render the logs
+    const Rendered = await AddSeperatorsAndRenderLogs(Logs); // render the logs
     
     RelevantElements.Containers.Logs.html(Rendered); // render the logs
 
     // Scroll to the bottom, which will be the most recent logs
 
-    document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
+    if (!NoScroll) {
 
-        top: document.scrollingElement.scrollHeight,
-        behavior: SmoothScroll ? "smooth" : "instant"
+        document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
-    });
+            top: document.scrollingElement.scrollHeight,
+            behavior: SmoothScroll ? "smooth" : "instant"
+
+        });
+        
+    }
 
 }
 
-export async function AddSeperatorsAndRenderLogs(RawLogs: string[]): Promise<string> {
+export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
 
     const Result: string[] = []; // create an array to store the logs
 
@@ -384,15 +396,9 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: string[]): Promise<str
 
         const Log = RawLogs[i]; // get the log
 
-        const HTMLParseableLog = $.parseHTML(Log); // parse the log
-        const NextParseableLog = $.parseHTML(RawLogs[i + 1]); // parse the next log
-
-        const LogServiceUID = $(HTMLParseableLog).filter(".InlineItem.Log").attr("serviceuid") || "All";
-        const NextLogServiceUID = $(NextParseableLog).filter(".InlineItem.Log").attr("serviceuid") || "All"; // get the next log service UID
-
         if (i == 0 && GlobalStorage.CurrentService?.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
 
-            const FirstService = await GetService(LogServiceUID); // get the first service
+            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
 
             const Seperator = `<div class="ServiceLogsSeparator" style="margin-top: 0.25rem;"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
 
@@ -400,15 +406,15 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: string[]): Promise<str
 
         }
 
-        Result.push(Log);
+        Log.HTML && Result.push(Log.HTML);
 
         const NextLog = RawLogs[i + 1]; // get the next log
 
         if (!NextLog) break; // done
 
-        if (LogServiceUID != NextLogServiceUID) { // if the service UID is different
+        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
 
-            const NextService = await GetService(NextLogServiceUID); // get the next service
+            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
 
             const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
 
@@ -493,24 +499,16 @@ export function ShowNewLogNotification(Service: Service): void {
 
 }
 
-export function UpdateUIWithService(Service: Service): void {
+export function UpdateUIWithService(Service: Service, Logs: ServiceLog[]): void {
 
     RelevantElements.States.CurrentService.Label.text(Service.Name); // update the label with the service name
 
     let Warnings = 0, Errors = 0; // create the warning and error counts
 
-    Service.Logs.filter((Log) => {
+    Logs.forEach((Log) => {
 
-        const ParseableLog = $.parseHTML(Log); // parse the log
-
-        if ($(ParseableLog).hasClass("Warning")) { // if the log is a warning
-
-            Warnings++; // increment the warning count  
-
-        } else if ($(ParseableLog).hasClass("Error")) { // if the log is an error
-
-            Errors++; // increment the error count
-        }
+        if (Log.Level == LogLevel.Error) Errors++; // increment the error count
+        if (Log.Level == LogLevel.Warning) Warnings++; // increment the warning count
 
     })
 

@@ -1,9 +1,10 @@
 import $ from 'jquery';
 
 import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
-import { CreateService, GetAllServices, GetService } from '../Internals/Calls';
+import { CreateService, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
 import { GlobalStorage } from '../Main';
 import type { Service } from '../Misc/Structs';
+import { Log } from '../Misc/Utils';
 
 const RelevantElements = {
 
@@ -76,6 +77,8 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
 
+    WatchForLogViewScroll(); // Watch for scroll events on the logs view
+
 }
 
 // Window Refocus Listener
@@ -90,11 +93,11 @@ function WatchForWindowRefocus(): void {
 
             const CurrentService = GlobalStorage.CurrentService; // Get the current service
 
-            const Refreshed = await GetService(CurrentService?.UID || "All", true);
+            const Refreshed = await GetService(CurrentService?.UID || "All");
 
             if (Refreshed) { // If there is a current service, reload it
 
-                SwitchToService(Refreshed, true); // Switch to the refreshed service (with scroll)
+                SwitchToService(Refreshed, undefined, true); // Switch to the refreshed service (with scroll)
 
             }
 
@@ -195,15 +198,56 @@ function WatchForCreateService(): void {
 
 }
 
+// Logs View
+
+export function WatchForLogViewScroll(): void {
+
+    // Make requests for more logs when in "All" mode, since it is paginated for speed (Experimental)
+
+    document.scrollingElement?.addEventListener("scroll", async () => {
+
+        console.log(document.scrollingElement?.scrollTop || 0); // log the scroll position
+
+        // Check if scrolled all the way up
+
+        if ((document.scrollingElement?.scrollTop || 0) < 100) { // 100px from the top will trigger new logs
+
+            const CurrentService = GlobalStorage.CurrentService; // get the current service
+
+            if (CurrentService?.UID == "All") { // if in "All" mode
+
+                const LastOffset = GlobalStorage.States.Pagination.LastOffset; 
+                const LastLimit = GlobalStorage.States.Pagination.LastLimit; 
+
+                const NewOffset = LastOffset + LastLimit; // increment the offset by the limit
+
+                Log("Info", `User scrolling more logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
+
+                const Service = await GetService(CurrentService.UID);
+
+                if (!Service) { return; } 
+
+                const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); // get the new logs
+
+                SwitchToService(Service, NewLogs, undefined, true); // switch to the logs (providing the logs) WITHOUT scrolling
+                
+            }
+
+        }
+
+    });
+
+}
+
 // Reload Button
 
 async function WatchForReloadBtn(): Promise<void> {
 
     RelevantElements.Buttons.ReloadBtn.on("click", async () => {
 
-        const Refreshed = await GetService(GlobalStorage.CurrentService?.UID || "All", true); // get the service (AND its logs) from the backend
+        const Refreshed = await GetService(GlobalStorage.CurrentService?.UID || "All"); // get the service from the backend
 
-        Refreshed && SwitchToService(Refreshed, true); // Smooth scroll for some fun
+        Refreshed && SwitchToService(Refreshed, undefined, true); // Smooth scroll for some fun
         
     });
 
@@ -240,7 +284,7 @@ function WatchForServiceSwitches(): void {
 
         const ServiceUID = Selected.Value; // get the service UID from the select menu
 
-        const Service = await GetService(ServiceUID, true); // get the service (AND its logs) from the backend
+        const Service = await GetService(ServiceUID); // get the service (AND its logs) from the backend
 
         if (!Service) { return; } // if the service is null, return
 

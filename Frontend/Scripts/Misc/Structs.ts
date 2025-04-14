@@ -29,6 +29,13 @@ export interface GlobalCache {
 
 export interface GlobalStates {
 
+    Pagination: {
+
+        LastOffset: number;
+        LastLimit: number;
+
+    }
+
 }
 
 export interface Storage {
@@ -106,8 +113,6 @@ export interface Service {
     Name: string;
     Description: string;
     Icon: string;
-
-    Logs: string[];
 
     MaxLogs: number;
 
