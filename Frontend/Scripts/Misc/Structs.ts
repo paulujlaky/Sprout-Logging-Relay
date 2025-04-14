@@ -105,7 +105,7 @@ export interface ServiceLog {
 
     Created: number;
 
-    HTML?: string; // Is defined everywhere on backend, but was added later on... so best to be cautious
+    HTML: string; 
 
 }
 

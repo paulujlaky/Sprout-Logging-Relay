@@ -440,23 +440,19 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     const ShowAsNotification = async () => {
 
-        const FromService = await GetService(FromServiceUID); // get the service from the UID
+        const FromService = await GetService(FromServiceUID); 
 
-        FromService && ShowNewLogNotification(FromService); // show the notification (we know the service will be the current one)
-
+        FromService && ShowNewLogNotification(FromService); 
 
     }
 
     if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
 
-        ShowAsNotification(); // show the notification
+        ShowAsNotification();
+        return;
 
     }
-
-    const HTML = Log.HTML; // get the HTML for the log
-
-    if (!HTML) return; // if the HTML is empty, ignore it
-
+    
     if (RelevantElements.Containers.Start.is(":visible")) { // if the start message is visible, hide it
 
         RelevantElements.Containers.Start.hide(); // hide the start message
@@ -478,13 +474,15 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     }
 
-    RelevantElements.Containers.Logs.append(HTML); // append the log to the logs container
+    const ShouldScroll = IsElementInViewport(LastLog);
+
+    RelevantElements.Containers.Logs.append(Log.HTML); // append the log to the logs container
 
     UpdateLogStatsFromAppendedLog(Log); // update the log stats
 
     // we'll only scroll if the user is at the bottom of the logs 
 
-    if (IsElementInViewport(LastLog)) {
+    if (ShouldScroll) { 
     
         document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
