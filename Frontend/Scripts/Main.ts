@@ -36,6 +36,12 @@ export const GlobalStorage: Storage = {
             IsNoMoreLogs: false,
             IsMakingRequests: false,
 
+            Debounce: {
+                
+                Debounced: false,
+
+            }
+
         }
         
     }
@@ -52,7 +58,7 @@ if (IsAuthed) {
 
     const ConglomorateService = await GetService("All"); // Get all services with logs
 
-    Log("Info", "All services loaded, rendering UI");
+    Log("Info", "All services loaded... rendering.");
 
     HideLoadingView();
 

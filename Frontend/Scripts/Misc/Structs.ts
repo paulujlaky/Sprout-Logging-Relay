@@ -43,6 +43,12 @@ export interface GlobalStates {
         IsNoMoreLogs: boolean;
         IsMakingRequests: boolean;
 
+        Debounce: {
+
+            Debounced: boolean;
+
+        }
+
     }
 
 }

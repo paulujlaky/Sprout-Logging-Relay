@@ -5,7 +5,7 @@ import { GlobalStorage } from "../Main";
 import { GetService, GetServiceLogs } from "../Internals/Calls";
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
-import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+import { RemoveDialogOnEscape, ResetPaginationState, SubmitDialogOnEnter } from "./Interactions";
 
 import { Log, PluralizeWord } from "../Misc/Utils";
 
@@ -383,16 +383,6 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
         });
         
     }
-
-}
-
-function ResetPaginationState(): void {
-
-    GlobalStorage.States.Pagination.LastOffset = 0; 
-    GlobalStorage.States.Pagination.LastLimit = 25;
-    
-    GlobalStorage.States.Pagination.IsNoMoreLogs = false;
-    GlobalStorage.States.Pagination.IsMakingRequests = false;
 
 }
 

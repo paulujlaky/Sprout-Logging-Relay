@@ -78,8 +78,7 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
     PopulateServiceSelect(AllServices); // Populate the service select menu with all services
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
-
-    WatchForLogViewScroll(); 
+    WatchForLogViewScroll(); // Watch for scroll events on the log view
 
 }
 
@@ -202,67 +201,60 @@ function WatchForCreateService(): void {
 
 // Logs View
 
-function Debounce(Func: (...Args: any[]) => void, Delay: number): (...Args: any[]) => void {
-
-    let Timeout: number | undefined;
-
-    return (...Args: any[]) => {
-
-        clearTimeout(Timeout);
-        Timeout = window.setTimeout(() => Func(...Args), Delay);
-
-    };
-
-}
-
 export function WatchForLogViewScroll(): void {
 
-    const HandleScroll = Debounce(async () => {
+    RelevantElements.Document.on("scroll", async () => {
 
-        if ((document.scrollingElement?.scrollTop || 0) < 100) { // 100px from the top will trigger new logs
+        // State Checks
 
-            const CurrentService = GlobalStorage.CurrentService;
+        if (!IsNearTop(500)) { return; }
 
-            if (GlobalStorage.States.Pagination.IsMakingRequests || GlobalStorage.States.Pagination.IsNoMoreLogs || !CurrentService) { return; } // if already making requests, return
+        if (GlobalStorage.States.Pagination.Debounce.Debounced) { return; } 
+        if (GlobalStorage.States.Pagination.IsMakingRequests) { return; } 
+        if (GlobalStorage.States.Pagination.IsNoMoreLogs) { return; } 
+        
+        // Flag Assignments
 
-            GlobalStorage.States.Pagination.IsMakingRequests = true; // set the flag to true
+        GlobalStorage.States.Pagination.Debounce.Debounced = true;
+        GlobalStorage.States.Pagination.IsMakingRequests = true;
+        
+        const CurrentOffset = GlobalStorage.States.Pagination.LastOffset;
+        const CurrentLimit = GlobalStorage.States.Pagination.LastLimit;
+        
+        Log("Info", `User scroll detected; getting ${CurrentLimit} logs at offset ${CurrentOffset + CurrentLimit}`);
+        
+        // Make Request and Add to UI
 
-            const LastOffset = GlobalStorage.States.Pagination.LastOffset; 
-            const LastLimit = GlobalStorage.States.Pagination.LastLimit; 
+        const Logs = await GetServiceLogs(
 
-            const NewOffset = LastOffset + LastLimit; // increment the offset by the limit
+            GlobalStorage.CurrentService?.UID || "All", 
+            CurrentOffset + CurrentLimit, 
+            CurrentLimit
+            
+        ); 
+        
+        // Only update offset if we actually got logs
 
-            Log("Info", `Scroll detected; requesting additional logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
+        if (Logs.length > 0) {
 
-            const Service = await GetService(CurrentService.UID);
-
-            if (!Service) {
-
-                GlobalStorage.States.Pagination.IsMakingRequests = false; 
-                return;
-                
-            } 
-
-            const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); 
-
-            const CurrentPos = document.scrollingElement?.scrollTop || 0; // get the current scroll position
-
-            AppendLogsOnTop(NewLogs);
-
-            document.scrollingElement?.scrollTo({ top: CurrentPos, behavior: "instant" }); // keep the scroll position the same
-
-            // Set vars
-
-            GlobalStorage.States.Pagination.IsMakingRequests = false; // set the flag to false
-            GlobalStorage.States.Pagination.LastOffset = NewOffset; 
-            GlobalStorage.States.Pagination.IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
+            GlobalStorage.States.Pagination.LastOffset = CurrentOffset + CurrentLimit;
+            AppendLogsOnTop(Logs);
 
         }
+        
+        // Reset Flag Assignments
 
-    }, 200); // 200ms debounce
-
-    document?.addEventListener("scroll", HandleScroll);
+        GlobalStorage.States.Pagination.IsNoMoreLogs = Logs.length < CurrentLimit;
+        GlobalStorage.States.Pagination.IsMakingRequests = false;
     
+        window.setTimeout(() => { 
+
+            GlobalStorage.States.Pagination.Debounce.Debounced = false; 
+
+        }, 250); // 250ms
+
+    });
+
 }
 
 // Reload Button
@@ -277,6 +269,16 @@ async function WatchForReloadBtn(): Promise<void> {
         
     });
 
+}
+
+export function ResetPaginationState(): void {
+    
+    GlobalStorage.States.Pagination.IsNoMoreLogs = false;
+    GlobalStorage.States.Pagination.IsMakingRequests = false;
+
+    GlobalStorage.States.Pagination.LastOffset = 0;
+    GlobalStorage.States.Pagination.LastLimit = 25;
+        
 }
 
 // Context Menu
@@ -434,6 +436,14 @@ export function IsNearBottom(Threshold: number = 150): boolean {
     const ScrollBottom = ScrollHeight - FullHeight - ScrollTop; // get the scroll bottom of the document
 
     return ScrollBottom < Threshold; // check if the scroll bottom is less than the threshold
+
+}
+
+export function IsNearTop(Threshold: number = 150): boolean {
+
+    const ScrollTop = document.scrollingElement?.scrollTop || 0; // get the scroll top of the document
+
+    return ScrollTop < Threshold; // check if the scroll top is less than the threshold
 
 }
 
