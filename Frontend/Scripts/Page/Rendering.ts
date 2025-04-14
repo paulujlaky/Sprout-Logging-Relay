@@ -424,11 +424,18 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: string[]): Promise<str
 
 export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, FromSocket: boolean = false): Promise<void> {
 
-    if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
+    const ShowAsNotification = async () => {
 
         const FromService = await GetService(FromServiceUID); // get the service from the UID
 
         FromService && ShowNewLogNotification(FromService); // show the notification (we know the service will be the current one)
+
+
+    }
+
+    if (FromSocket && GlobalStorage.CurrentService?.UID != FromServiceUID && GlobalStorage.CurrentService?.UID != "All") { // remember, if current service UID is all, we want to show all logs
+
+        ShowAsNotification(); // show the notification
 
     }
 
@@ -472,6 +479,10 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
         });
         
+    } else {
+
+        ShowAsNotification(); // show the notification
+
     }
         
 }
