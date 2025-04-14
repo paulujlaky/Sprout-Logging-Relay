@@ -258,7 +258,7 @@ async function WatchForReloadBtn(): Promise<void> {
 
         const Refreshed = await GetService(GlobalStorage.CurrentService?.UID || "All"); // get the service from the backend
 
-        Refreshed && SwitchToService(Refreshed, undefined, true); // Smooth scroll for some fun
+        Refreshed && SwitchToService(Refreshed, true); // Smooth scroll for some fun
         
     });
 
