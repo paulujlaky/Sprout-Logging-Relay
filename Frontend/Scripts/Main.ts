@@ -32,7 +32,6 @@ if (IsAuthed) {
 
     const AllServices = await GetAllServices();
 
-
     WatchPageInteractions(AllServices); // Watch for page interactions
 
     const ConglomorateService = await GetService("All", true); // Get all services with logs
