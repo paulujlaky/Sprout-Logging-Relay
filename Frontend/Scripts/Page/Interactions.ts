@@ -407,11 +407,15 @@ export function RemoveDialogOnEscape(Dialog: JQuery<HTMLDialogElement>): void {
 
 }
 
-export function IsElementInViewport(Element: JQuery<HTMLElement>): boolean {
+export function IsNearBottom(Threshold: number = 150): boolean {
 
-    const Rect = Element[0].getBoundingClientRect(); // get the bounding rect of the element
+    const FullHeight = window.innerHeight || document.documentElement.clientHeight; // get the full height of the window
+    const ScrollHeight = document.scrollingElement?.scrollHeight || 0; // get the scroll height of the document
+    const ScrollTop = document.scrollingElement?.scrollTop || 0; // get the scroll top of the document
 
-    return (Rect.top >= 0 && Rect.left >= 0 && Rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && Rect.right <= (window.innerWidth || document.documentElement.clientWidth)); // check if the element is in the viewport
+    const ScrollBottom = ScrollHeight - FullHeight - ScrollTop; // get the scroll bottom of the document
+
+    return ScrollBottom < Threshold; // check if the scroll bottom is less than the threshold
 
 }
 

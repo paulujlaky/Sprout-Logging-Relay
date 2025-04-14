@@ -3,7 +3,7 @@ import type { ServiceLog, Storage } from "./Misc/Structs";
 import { Authorize } from "./Systems/Auth";
 
 import { AppendLogToUI, HideLoadingView, SwitchToService } from "./Page/Rendering";
-import { WatchPageInteractions } from "./Page/Interactions";
+import { IsNearBottom, WatchPageInteractions } from "./Page/Interactions";
 
 import { GetAllServices, GetService, WatchForLogs } from "./Internals/Calls";
 import { Log } from "./Misc/Utils";
@@ -21,6 +21,12 @@ export const GlobalStorage: Storage = {
     },
 
     States: {
+
+        Scrolling: {
+            
+            IsAtBottom: true
+
+        },
         
         Pagination: {
             
@@ -64,4 +70,10 @@ if (IsAuthed) {
 
     WatchForLogs(LogListener);
 
-}
+    setInterval(() => {
+
+        GlobalStorage.States.Scrolling.IsAtBottom = IsNearBottom();
+        
+    }, 1_000); // Check if near bottom every second to debounce scrolling
+
+} 

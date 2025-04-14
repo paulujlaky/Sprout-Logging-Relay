@@ -29,6 +29,12 @@ export interface GlobalCache {
 
 export interface GlobalStates {
 
+    Scrolling: {    
+
+        IsAtBottom: boolean;
+    
+    },
+
     Pagination: {
 
         LastOffset: number;

@@ -5,7 +5,7 @@ import { GlobalStorage } from "../Main";
 import { GetService, GetServiceLogs } from "../Internals/Calls";
 import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAccount } from "../Misc/Structs";
 
-import { IsElementInViewport, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
+import { RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 
 import { Log, PluralizeWord } from "../Misc/Utils";
 
@@ -474,15 +474,13 @@ export async function AppendLogToUI(FromServiceUID: string, Log: ServiceLog, Fro
 
     }
 
-    const ShouldScroll = IsElementInViewport(LastLog);
-
     RelevantElements.Containers.Logs.append(Log.HTML); // append the log to the logs container
 
     UpdateLogStatsFromAppendedLog(Log); // update the log stats
 
     // we'll only scroll if the user is at the bottom of the logs 
 
-    if (ShouldScroll) { 
+    if (GlobalStorage.States.Scrolling.IsAtBottom) { // if the user is at the bottom of the logs
     
         document.scrollingElement?.scrollTo({ // scroll to the bottom of the logs
 
