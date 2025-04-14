@@ -204,18 +204,15 @@ function WatchForCreateService(): void {
 
 export function WatchForLogViewScroll(): void {
 
-    let MakingRequests: boolean = false; // flag to prevent multiple requests
-    let IsNoMoreLogs: boolean = false; // flag to prevent requests when there are no more logs
-
     document?.addEventListener("scroll", async () => {
 
         if ((document.scrollingElement?.scrollTop || 0) < 100) { // 100px from the top will trigger new logs
 
             const CurrentService = GlobalStorage.CurrentService;
 
-            if (MakingRequests || IsNoMoreLogs || !CurrentService) { return; } // if already making requests, return
+            if (GlobalStorage.States.Pagination.IsMakingRequests || GlobalStorage.States.Pagination.IsNoMoreLogs || !CurrentService) { return; } // if already making requests, return
 
-            MakingRequests = true; // set the flag to true
+            GlobalStorage.States.Pagination.IsMakingRequests = true; // set the flag to true
 
             const LastOffset = GlobalStorage.States.Pagination.LastOffset; 
             const LastLimit = GlobalStorage.States.Pagination.LastLimit; 
@@ -228,7 +225,7 @@ export function WatchForLogViewScroll(): void {
 
             if (!Service) {
                 
-                MakingRequests = false; // reset the flag
+                GlobalStorage.States.Pagination.IsMakingRequests = false; 
                 return;
 
             } 
@@ -239,10 +236,10 @@ export function WatchForLogViewScroll(): void {
 
             // Set vars
 
-            MakingRequests = false; 
+            GlobalStorage.States.Pagination.IsMakingRequests = false; // set the flag to false
             GlobalStorage.States.Pagination.LastOffset = NewOffset; 
 
-            IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
+            GlobalStorage.States.Pagination.IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
             
         }
 

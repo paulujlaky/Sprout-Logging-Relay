@@ -340,8 +340,14 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
 
-    GlobalStorage.CurrentService = Service; // set the current service in the global storage
+    if ((GlobalStorage.CurrentService?.UID || "All") !== Service.UID) {
 
+        ResetPaginationState(); // reset the pagination state
+
+    }
+
+    GlobalStorage.CurrentService = Service; // set the current service in the global storage
+    
     const Logs = await GetServiceLogs(Service.UID); // get the logs for the service
         
     UpdateUIWithService(Service, Logs); // update the UI with the new service
@@ -377,6 +383,16 @@ export async function SwitchToService(Service: Service, SmoothScroll: boolean = 
         });
         
     }
+
+}
+
+function ResetPaginationState(): void {
+
+    GlobalStorage.States.Pagination.LastOffset = 0; 
+    GlobalStorage.States.Pagination.LastLimit = 25;
+    
+    GlobalStorage.States.Pagination.IsNoMoreLogs = false;
+    GlobalStorage.States.Pagination.IsMakingRequests = false;
 
 }
 

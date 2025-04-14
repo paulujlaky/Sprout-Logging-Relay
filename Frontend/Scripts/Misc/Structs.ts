@@ -34,6 +34,9 @@ export interface GlobalStates {
         LastOffset: number;
         LastLimit: number;
 
+        IsNoMoreLogs: boolean;
+        IsMakingRequests: boolean;
+
     }
 
 }

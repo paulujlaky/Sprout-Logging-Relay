@@ -27,6 +27,9 @@ export const GlobalStorage: Storage = {
             LastOffset: 0,
             LastLimit: 25,
 
+            IsNoMoreLogs: false,
+            IsMakingRequests: false,
+
         }
         
     }
