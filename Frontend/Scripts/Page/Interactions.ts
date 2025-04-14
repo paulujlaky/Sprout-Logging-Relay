@@ -99,7 +99,7 @@ function WatchForWindowRefocus(): void {
 
             if (Refreshed) { // If there is a current service, reload it
 
-                SwitchToService(Refreshed, undefined, true); // Switch to the refreshed service (with scroll)
+                SwitchToService(Refreshed, undefined, true); // Switch to the refreshed service (with no scroll)
 
             }
 
