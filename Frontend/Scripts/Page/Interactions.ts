@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { GlobalStorage } from '../Main';
 
 import type { Service } from '../Misc/Structs';
-import { Log } from 'Utils';
+import { Log } from '../Misc/Utils';
 
 import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';

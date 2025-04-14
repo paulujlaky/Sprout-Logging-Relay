@@ -7,7 +7,7 @@ import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAcc
 
 import { IsElementInViewport, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 
-import { Log, PluralizeWord } from "Utils";
+import { Log, PluralizeWord } from "../Misc/Utils";
 
 const RelevantElements = {
 

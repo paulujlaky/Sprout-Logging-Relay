@@ -4,7 +4,7 @@ import { GlobalStorage } from "../Main";
 
 import type { ServiceLog, Service } from "../Misc/Structs";
 
-import { AddItemToCache, Log, MakeRequest } from "Utils";
+import { AddItemToCache, Log, MakeRequest } from "../Misc/Utils";
 
 import Routes from "../../Routes.json";
 
