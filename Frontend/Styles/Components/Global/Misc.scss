@@ -136,13 +136,14 @@ SelectMenu {
 SelectMenuOptions {
 
     @include Container;
-    @include GlassBackground;
     @include FlexVertical;
 
     position: absolute;
     z-index: 100;
 
     gap: calc($SpacingSmall * 0.75);
+    
+    background-color: rgb(28, 28, 28);
 
     padding: calc($SpacingSmall * 1.25) calc($SpacingSmall * 1.5);
 
@@ -160,6 +161,7 @@ SelectMenuOption {
     gap: calc($SpacingSmall * 0.5);
 
     min-width: 100%;
+    width: 105%;
 
     padding: $SpacingSmall;
     margin-left: -5px;

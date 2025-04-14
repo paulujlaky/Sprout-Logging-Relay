@@ -99,7 +99,7 @@ func CreateLog(GinContext *gin.Context) {
 
 	// Create log
 
-	AddLogError, NewLog := Service.AddLog(Models.LogLevel(ParsedLevel), Title, Content)
+	NewLog, AddLogError := Service.AddLog(Models.LogLevel(ParsedLevel), Title, Content)
 	
 	if AddLogError != nil {
 

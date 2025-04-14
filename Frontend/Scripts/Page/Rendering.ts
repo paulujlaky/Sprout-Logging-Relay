@@ -7,7 +7,7 @@ import { AnimationTimes, LogLevel, type Service, type ServiceLog, type SproutAcc
 
 import { IsElementInViewport, RemoveDialogOnEscape, SubmitDialogOnEnter } from "./Interactions";
 
-import { Log, PluralizeWord } from "../Misc/Utils";
+import { Log, PluralizeWord } from "Utils";
 
 const RelevantElements = {
 
@@ -336,19 +336,13 @@ export function PopulateServiceSelect(Services: Partial<Service>[]): void {
 
 // Service State
 
-export async function SwitchToService(Service: Service, OverrideLogs?: ServiceLog[], SmoothScroll: boolean = false, NoScroll: boolean = false): Promise<void> {
+export async function SwitchToService(Service: Service, SmoothScroll: boolean = false, NoScroll: boolean = false): Promise<void> {
 
     Log("Info", `Switching to service ${Service.Name} (UID ${Service.UID})`); // log the switch
 
     GlobalStorage.CurrentService = Service; // set the current service in the global storage
 
-    let Logs = OverrideLogs || []; // get the logs from the service
-
-    if (!OverrideLogs) { // if no logs are provided, get the logs from the service
-
-        Logs = await GetServiceLogs(Service.UID); // get the logs for the service
-
-    }
+    const Logs = await GetServiceLogs(Service.UID); // get the logs for the service
         
     UpdateUIWithService(Service, Logs); // update the UI with the new service
 
@@ -386,6 +380,14 @@ export async function SwitchToService(Service: Service, OverrideLogs?: ServiceLo
 
 }
 
+export async function AppendLogsOnTop(Logs: ServiceLog[]): Promise<void> {
+
+    const Rendered = await AddSeperatorsAndRenderLogs(Logs); // render the logs
+
+    RelevantElements.Containers.Logs.prepend(Rendered); // prepend the logs
+    
+}
+
 export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
 
     const Result: string[] = []; // create an array to store the logs
@@ -395,16 +397,6 @@ export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise
     for (let i = 0; i < RawLogs.length; i++) {
 
         const Log = RawLogs[i]; // get the log
-
-        if (i == 0 && GlobalStorage.CurrentService?.UID == "All") { // if the service is all, we're viewing all logs and this may be somewhat ideal
-
-            const FirstService = await GetService(Log.ParentServiceUID); // get the first service
-
-            const Seperator = `<div class="ServiceLogsSeparator" style="margin-top: 0.25rem;"><div class="Line"></div>${FirstService?.Name}<div class="Line"></div></div>`
-
-            Result.push(Seperator); // add the seperator to the result
-
-        }
 
         Log.HTML && Result.push(Log.HTML);
 

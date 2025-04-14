@@ -1,11 +1,12 @@
+import { GlobalStorage } from "../Main";
+
 // File which contains most functions which utilize API calls to the backend
 
 import type { ServiceLog, Service } from "../Misc/Structs";
 
-import { AddItemToCache, Log, MakeRequest } from "../Misc/Utils";
+import { AddItemToCache, Log, MakeRequest } from "Utils";
 
 import Routes from "../../Routes.json";
-import { GlobalStorage } from "../Main";
 
 // Services
 
@@ -102,11 +103,7 @@ export async function GetServiceLogs(ServiceUID: string, Offset: number = 0, Lim
 
     // Get all logs for a service
 
-    const Route = Routes.ViewServiceSpecificLogs;
-
-    Route.Path += `?Offset=${Offset}&Limit=${Limit}`; // Add offset and limit to the route
-
-    const Response = await MakeRequest(Route, null, {}, { ServiceUID: ServiceUID });
+    const Response = await MakeRequest(Routes.ViewServiceSpecificLogs, null, {}, { ServiceUID: ServiceUID }, { Offset: Offset, Limit: Limit });
 
     if (!Response || !Response.JSON) {
 
@@ -174,17 +171,12 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
     }
 
-    const PingInt = setInterval(() => {
+    setInterval(() => {
 
         if (WebSocketInstance.readyState == WebSocket.OPEN) {
 
             WebSocketInstance.send("Ping"); // Send a ping every 5 seconds
 
-        } else if (WebSocketInstance.readyState == WebSocket.CLOSED) {
-
-            clearInterval(PingInt);
-            Log("Error", "Detected disconnection from logs websocket. Stopping ping.");
-            
         }
 
     }, 30_000); // 30 seconds
@@ -197,12 +189,11 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
             Log("Error", "Detected disconnection from logs websocket. Attempting to reconnect.");
 
-            const NewWebSocket = new WebSocket(WatchLogsRouteURL); // Attempt to reconnect
+            WebSocketInstance = new WebSocket(WatchLogsRouteURL); // Attempt to reconnect
 
-            NewWebSocket.onopen = () => {
+            WebSocketInstance.onopen = () => {
 
                 Log("Info", "Reconnected to logs websocket.");
-                WebSocketInstance = NewWebSocket; // Set the new websocket instance
 
             }
 

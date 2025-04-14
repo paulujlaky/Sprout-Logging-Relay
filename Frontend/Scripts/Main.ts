@@ -6,7 +6,7 @@ import { AppendLogToUI, HideLoadingView, SwitchToService } from "./Page/Renderin
 import { WatchPageInteractions } from "./Page/Interactions";
 
 import { GetAllServices, GetService, WatchForLogs } from "./Internals/Calls";
-import { Log } from "./Misc/Utils";
+import { Log } from "Utils";
 
 export const GlobalStorage: Storage = {
 

@@ -5,7 +5,7 @@ import $ from "jquery";
 import { GlobalStorage } from "../Main";
 import type { SproutAccount } from "../Misc/Structs";
 
-import { GetURLParameter, Log, MakeRequest, RemoveURLParameter } from "../Misc/Utils";
+import { GetURLParameter, Log, MakeRequest, RemoveURLParameter } from "Utils";
 
 import { UpdateAuthElements } from "../Page/Rendering";
 

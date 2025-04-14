@@ -2,6 +2,7 @@ package Models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"elucid503/SproutLoggingRelay/Functions"
@@ -87,18 +88,18 @@ func ListLogsFromDB(ServiceUID string, Offset int, Limit int) ([]*Log, error) {
 	Filter := gin.H{}
 
 	if (ServiceUID != "All") {
-	
+
 		// We want specific logs from a service
 
-		Filter = gin.H{"ParentServiceUID": ServiceUID}		
-		
+		Filter = gin.H{"parentserviceuid": ServiceUID}	
+
 	}
 
 	Options := options.Find()
 
-	Options.SetSort(gin.H{"created": -1}) // sort by created date (newest first)
-	Options.SetSkip(int64(Offset)) // skip the first Offset logs
-	Options.SetLimit(int64(Limit)) // limit the number of logs to Limit
+	Options.SetSort(gin.H{"created": -1}) // sort by created date (oldest first)
+	Options.SetSkip(int64(Offset))       // skip the first Offset logs
+	Options.SetLimit(int64(Limit))       // limit the number of logs to Limit
 	Options.SetProjection(gin.H{"_id": 0}) // exclude the _id field from the results
 
 	Cursor, Err := Misc.Database.Collection("Logs").Find(context.TODO(), Filter, Options)
@@ -124,6 +125,14 @@ func ListLogsFromDB(ServiceUID string, Offset int, Limit int) ([]*Log, error) {
 		}
 
 		Logs = append(Logs, &LogData)
+
+	}
+
+	// Reverse the logs to show the most recent first
+
+	for i, j := 0, len(Logs)-1; i < j; i, j = i+1, j-1 {
+
+		Logs[i], Logs[j] = Logs[j], Logs[i]
 
 	}
 
@@ -180,6 +189,8 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	if CntError != nil {
 
+		fmt.Println("Error counting logs:", CntError)
+
 		return nil, CntError
 
 	}
@@ -192,14 +203,24 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 		if DelError != nil {
 
+			fmt.Println("Error deleting log:", DelError)
+
 			return nil, DelError
 
 		}
 
 	}
 	
-	Misc.Database.Collection("Logs").InsertOne(context.TODO(), NewLog) // insert the log into the database
+	_, InsertErr := Misc.Database.Collection("Logs").InsertOne(context.TODO(), NewLog) // insert the log into the database
 
-	return &NewLog, nil // return the log
+	if InsertErr != nil {
+
+		fmt.Println("Error inserting log:", InsertErr)
+
+		return nil, InsertErr
+		
+	}
+
+	return &NewLog, nil
 
 }

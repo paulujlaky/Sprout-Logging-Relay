@@ -1,10 +1,12 @@
 import $ from 'jquery';
 
-import { HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
-import { CreateService, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
 import { GlobalStorage } from '../Main';
+
 import type { Service } from '../Misc/Structs';
-import { Log } from '../Misc/Utils';
+import { Log } from 'Utils';
+
+import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
+import { CreateService, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
 
 const RelevantElements = {
 
@@ -77,7 +79,7 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
 
-    WatchForLogViewScroll(); // Watch for scroll events on the logs view
+    WatchForLogViewScroll(); 
 
 }
 
@@ -202,37 +204,46 @@ function WatchForCreateService(): void {
 
 export function WatchForLogViewScroll(): void {
 
-    // Make requests for more logs when in "All" mode, since it is paginated for speed (Experimental)
+    let MakingRequests: boolean = false; // flag to prevent multiple requests
+    let IsNoMoreLogs: boolean = false; // flag to prevent requests when there are no more logs
 
-    document.scrollingElement?.addEventListener("scroll", async () => {
-
-        console.log(document.scrollingElement?.scrollTop || 0); // log the scroll position
-
-        // Check if scrolled all the way up
+    document?.addEventListener("scroll", async () => {
 
         if ((document.scrollingElement?.scrollTop || 0) < 100) { // 100px from the top will trigger new logs
 
-            const CurrentService = GlobalStorage.CurrentService; // get the current service
+            const CurrentService = GlobalStorage.CurrentService;
 
-            if (CurrentService?.UID == "All") { // if in "All" mode
+            if (MakingRequests || IsNoMoreLogs || !CurrentService) { return; } // if already making requests, return
 
-                const LastOffset = GlobalStorage.States.Pagination.LastOffset; 
-                const LastLimit = GlobalStorage.States.Pagination.LastLimit; 
+            MakingRequests = true; // set the flag to true
 
-                const NewOffset = LastOffset + LastLimit; // increment the offset by the limit
+            const LastOffset = GlobalStorage.States.Pagination.LastOffset; 
+            const LastLimit = GlobalStorage.States.Pagination.LastLimit; 
 
-                Log("Info", `User scrolling more logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
+            const NewOffset = LastOffset + LastLimit; // increment the offset by the limit
 
-                const Service = await GetService(CurrentService.UID);
+            Log("Info", `User scrolling more logs with offset ${NewOffset} and limit ${LastLimit}`); // log the event
 
-                if (!Service) { return; } 
+            const Service = await GetService(CurrentService.UID);
 
-                const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); // get the new logs
-
-                SwitchToService(Service, NewLogs, undefined, true); // switch to the logs (providing the logs) WITHOUT scrolling
+            if (!Service) {
                 
-            }
+                MakingRequests = false; // reset the flag
+                return;
 
+            } 
+
+            const NewLogs = await GetServiceLogs(CurrentService.UID, NewOffset, LastLimit); 
+
+            AppendLogsOnTop(NewLogs);
+
+            // Set vars
+
+            MakingRequests = false; 
+            GlobalStorage.States.Pagination.LastOffset = NewOffset; 
+
+            IsNoMoreLogs = NewLogs.length < LastLimit; // if the logs are less than the limit, set the flag to true
+            
         }
 
     });
