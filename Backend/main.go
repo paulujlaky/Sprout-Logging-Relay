@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,7 +9,6 @@ import (
 
 	"elucid503/SproutLoggingRelay/Assets"
 	"elucid503/SproutLoggingRelay/Misc"
-	"elucid503/SproutLoggingRelay/Models"
 
 	"elucid503/SproutLoggingRelay/Middleware"
 	"elucid503/SproutLoggingRelay/Types"
@@ -108,10 +106,6 @@ func main() {
 
 	fmt.Println("Connected to the database...")
 
-	InitLogs()
-
-	fmt.Printf("Loaded %d cached services...\n", len(Models.CachedServicesAndLogs))
-
 	fmt.Printf("Listening on port %d...\n", Config.Server.Port)
 
 	// Serve Static files
@@ -131,23 +125,5 @@ func main() {
 		// Block forever
 
 	} // Block forever
-
-}
-
-func InitLogs() {
-
-	var Services []Models.Service = []Models.Service{}
-
-	DBCursor, _ := Misc.Database.Collection("Services").Find(context.TODO(), gin.H{}) // get all services
-
-	DBCursor.All(context.TODO(), &Services) // unmarshal all entries into Services slice
-
-	DBCursor.Close(context.TODO()) // after reading, free memory
-
-	for _, Service := range Services {
-
-		Models.CachedServicesAndLogs[Service.UID] = Service.Logs
-		
-	}
 
 }
