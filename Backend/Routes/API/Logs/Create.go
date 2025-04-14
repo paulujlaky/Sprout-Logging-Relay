@@ -116,6 +116,16 @@ func CreateLog(GinContext *gin.Context) {
 			Message: "Log added successfully",
 
 		})
+
+		// Update cache 
+
+		if _, Exists := Models.CachedServicesAndLogs[Service.UID]; !Exists {
+
+			Models.CachedServicesAndLogs[Service.UID] = []Models.Log{}
+
+		}
+
+		Models.CachedServicesAndLogs[Service.UID] = append(Models.CachedServicesAndLogs[Service.UID], *NewLog)
 		
 		// In this case, we also should send to all websockets waiting for logs that this log was created 
 		

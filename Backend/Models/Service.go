@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+var CachedServicesAndLogs map[string][]Log = make(map[string][]Log)
+
 type Service struct {
 
 	UID string `json:"UID"`
@@ -60,12 +62,8 @@ func ListServices(WithLogs bool) ([]Service, error) {
 
 	Options := options.Find()
 
-	if !WithLogs {
+	Options.SetProjection(gin.H{"logs": 0}) // remove logs from the projection b/c of cache
 
-		Options.SetProjection(gin.H{"logs": 0}) // exclude logs from the response using this projection
-	
-	} 
-		
 	DBCursor, Err := Misc.Database.Collection("Services").Find(context.TODO(), gin.H{}, Options) // get all services
 
 	if Err != nil {
@@ -77,6 +75,22 @@ func ListServices(WithLogs bool) ([]Service, error) {
 	DBCursor.All(context.TODO(), &Services) // unmarshal all entries into Services slice
 
 	DBCursor.Close(context.TODO()) // after reading, free memory
+
+	if (WithLogs) {
+
+		// Add from cache
+
+		for i := 0; i < len(Services); i++ {
+
+			if _, Exists := CachedServicesAndLogs[Services[i].UID]; Exists {
+
+				Services[i].Logs = CachedServicesAndLogs[Services[i].UID]
+
+			}
+
+		}
+		
+	}
 
 	return Services, nil
 	

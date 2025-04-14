@@ -29,7 +29,7 @@ func ViewServiceSpecificLogs(GinContext *gin.Context) {
 
 	}
 
-	Service, ServiceFetchErr := Models.GetServiceByUID(ServiceUID)
+	Service, ServiceFetchErr := Models.GetServiceByUID(ServiceUID) // TODO: Migrate this to caching, if we're happy with the performance gains
 
 	if ServiceFetchErr != nil {
 
