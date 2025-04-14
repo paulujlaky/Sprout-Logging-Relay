@@ -67,7 +67,7 @@ func ViewLogs(GinContext *gin.Context) {
 
 	GinContext.JSON(200, Types.Response{
 
-		Message: fmt.Sprintf("Successfully retrieved %d %s", len(AllLogs), Functions.PluralizeString(len(AllLogs), "log")),
+		Message: fmt.Sprintf("Retrieved %d %s", len(AllLogs), Functions.PluralizeString(len(AllLogs), "log")),
 		JSON: AllLogsHTMLArr,
 
 	});
