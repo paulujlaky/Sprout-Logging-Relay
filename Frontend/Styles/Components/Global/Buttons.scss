@@ -12,7 +12,7 @@ Button {
 
     padding: $SpacingSmall $SpacingMedium;
 
-    @include GlassBackground($ElementColorLight);
+    @include GlassBackgroundPersistent($ElementColorLight);
 
     cursor: pointer;
 

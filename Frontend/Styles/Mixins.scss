@@ -64,6 +64,15 @@
 
 }
 
+@mixin GlassBackgroundPersistent($Color: $ElementColorMedium) {
+
+    background-color: rgba($Color, 0.5);
+
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+}
+
 @mixin OverlayedBar() {
 
     position: fixed;
