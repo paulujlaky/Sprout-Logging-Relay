@@ -223,6 +223,10 @@ export function WatchForLogViewScroll(): void {
         
         Log("Info", `User scroll detected; getting ${CurrentLimit} logs at offset ${CurrentOffset + CurrentLimit}`);
         
+        // Cache current scroll height before logs are appended
+
+        const PreviousScrollHeight = document.documentElement.scrollHeight;
+        
         // Make Request and Add to UI
 
         const Logs = await GetServiceLogs(
@@ -230,20 +234,24 @@ export function WatchForLogViewScroll(): void {
             GlobalStorage.CurrentService?.UID || "All", 
             CurrentOffset + CurrentLimit, 
             CurrentLimit
-            
+
         ); 
         
-        // Only update offset if we actually got logs
-
         if (Logs.length > 0) {
+            
+            // Only update offset if we actually got logs
 
             GlobalStorage.States.Pagination.LastOffset = CurrentOffset + CurrentLimit;
             AppendLogsOnTop(Logs);
+            
+            const NewScrollHeight = document.documentElement.scrollHeight; // Adjust scroll to maintain user position
+
+            document.documentElement.scrollTop += NewScrollHeight - PreviousScrollHeight; // Increase scrollTop by the difference in scroll height so the user view doesn't jump to the top.
 
         }
         
         // Reset Flag Assignments
-
+        
         GlobalStorage.States.Pagination.IsNoMoreLogs = Logs.length < CurrentLimit;
         GlobalStorage.States.Pagination.IsMakingRequests = false;
     
@@ -251,7 +259,7 @@ export function WatchForLogViewScroll(): void {
 
             GlobalStorage.States.Pagination.Debounce.Debounced = false; 
 
-        }, 250); // 250ms
+        }, 250); // 250ms debounce duration
 
     });
 
