@@ -213,14 +213,6 @@ export function WatchForLogViewScroll(): void {
         if (GlobalStorage.States.Pagination.IsMakingRequests) { return; } 
         if (GlobalStorage.States.Pagination.IsNoMoreLogs) { return; } 
 
-        // Prevent infinite loop by checking if the user is actively scrolling
-
-        if (GlobalStorage.States.Pagination.UserScrollDetected) {
-
-            return;
-
-        }
-
         // Flag Assignments
 
         GlobalStorage.States.Pagination.Debounce.Debounced = true;
@@ -259,25 +251,7 @@ export function WatchForLogViewScroll(): void {
 
             GlobalStorage.States.Pagination.Debounce.Debounced = false; 
 
-        }, 250); // 250ms
-
-    });
-
-    // Detect user scroll activity to prevent infinite loop on mobile
-
-    RelevantElements.Document.on("touchmove", () => {
-
-        GlobalStorage.States.Pagination.UserScrollDetected = true;
-
-    });
-
-    RelevantElements.Document.on("touchend", () => {
-
-        setTimeout(() => {
-
-            GlobalStorage.States.Pagination.UserScrollDetected = false;
-
-        }, 500); // Reset after 500ms
+        }, 250); // 250ms Debounce
 
     });
 

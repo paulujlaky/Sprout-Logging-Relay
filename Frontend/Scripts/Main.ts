@@ -36,8 +36,6 @@ export const GlobalStorage: Storage = {
             IsNoMoreLogs: false,
             IsMakingRequests: false,
 
-            UserScrollDetected: false,
-
             Debounce: {
                 
                 Debounced: false,

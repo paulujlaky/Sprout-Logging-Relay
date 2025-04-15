@@ -390,8 +390,20 @@ export async function AppendLogsOnTop(Logs: ServiceLog[]): Promise<void> {
 
     const Rendered = await AddSeperatorsAndRenderLogs(Logs); // render the logs
 
-    RelevantElements.Containers.Logs.prepend(Rendered); // prepend the logs
-    
+    const LogsContainer = RelevantElements.Containers.Logs;
+
+    const PreviousOffset = LogsContainer[0].scrollTop;
+    const PreviousClientHeight = LogsContainer[0].clientHeight; 
+
+    LogsContainer.prepend(Rendered); // prepend the logs
+
+    document.scrollingElement?.scrollTo({
+
+        top: LogsContainer[0].scrollHeight - PreviousClientHeight - PreviousOffset + 450, // 450 px works well for some reason
+        behavior: "instant"
+
+    });
+
 }
 
 export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
