@@ -212,7 +212,15 @@ export function WatchForLogViewScroll(): void {
         if (GlobalStorage.States.Pagination.Debounce.Debounced) { return; } 
         if (GlobalStorage.States.Pagination.IsMakingRequests) { return; } 
         if (GlobalStorage.States.Pagination.IsNoMoreLogs) { return; } 
-        
+
+        // Prevent infinite loop by checking if the user is actively scrolling
+
+        if (GlobalStorage.States.Pagination.UserScrollDetected) {
+
+            return;
+
+        }
+
         // Flag Assignments
 
         GlobalStorage.States.Pagination.Debounce.Debounced = true;
@@ -223,10 +231,6 @@ export function WatchForLogViewScroll(): void {
         
         Log("Info", `User scroll detected; getting ${CurrentLimit} logs at offset ${CurrentOffset + CurrentLimit}`);
         
-        // Cache current scroll height before logs are appended
-
-        const PreviousScrollHeight = document.documentElement.scrollHeight;
-        
         // Make Request and Add to UI
 
         const Logs = await GetServiceLogs(
@@ -234,24 +238,20 @@ export function WatchForLogViewScroll(): void {
             GlobalStorage.CurrentService?.UID || "All", 
             CurrentOffset + CurrentLimit, 
             CurrentLimit
-
+            
         ); 
         
+        // Only update offset if we actually got logs
+
         if (Logs.length > 0) {
-            
-            // Only update offset if we actually got logs
 
             GlobalStorage.States.Pagination.LastOffset = CurrentOffset + CurrentLimit;
             AppendLogsOnTop(Logs);
-            
-            const NewScrollHeight = document.documentElement.scrollHeight; // Adjust scroll to maintain user position
-
-            document.documentElement.scrollTop += NewScrollHeight - PreviousScrollHeight; // Increase scrollTop by the difference in scroll height so the user view doesn't jump to the top.
 
         }
         
         // Reset Flag Assignments
-        
+
         GlobalStorage.States.Pagination.IsNoMoreLogs = Logs.length < CurrentLimit;
         GlobalStorage.States.Pagination.IsMakingRequests = false;
     
@@ -259,7 +259,25 @@ export function WatchForLogViewScroll(): void {
 
             GlobalStorage.States.Pagination.Debounce.Debounced = false; 
 
-        }, 250); // 250ms debounce duration
+        }, 250); // 250ms
+
+    });
+
+    // Detect user scroll activity to prevent infinite loop on mobile
+
+    RelevantElements.Document.on("touchmove", () => {
+
+        GlobalStorage.States.Pagination.UserScrollDetected = true;
+
+    });
+
+    RelevantElements.Document.on("touchend", () => {
+
+        setTimeout(() => {
+
+            GlobalStorage.States.Pagination.UserScrollDetected = false;
+
+        }, 500); // Reset after 500ms
 
     });
 

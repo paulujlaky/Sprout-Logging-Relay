@@ -43,6 +43,8 @@ export interface GlobalStates {
         IsNoMoreLogs: boolean;
         IsMakingRequests: boolean;
 
+        UserScrollDetected: boolean;
+
         Debounce: {
 
             Debounced: boolean;
