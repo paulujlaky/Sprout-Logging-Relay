@@ -85,7 +85,7 @@ func WatchAndDeleteOldLogsFromDatabase() {
 	for {
 
 		CurrentTime := time.Now()
-		FiveDaysAgo := CurrentTime.AddDate(0, 0, -5)
+		FiveDaysAgo := CurrentTime.AddDate(0, 0, -5).Unix()
 
 		_, Err := Database.Collection("Logs").DeleteMany(context.Background(), bson.M{"created": bson.M{"$lt": FiveDaysAgo}})
 
