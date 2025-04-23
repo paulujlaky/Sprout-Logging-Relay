@@ -116,6 +116,10 @@ func main() {
 
 	GinRouter.Run(fmt.Sprintf(":%d", Config.Server.Port))
 
+	// One more thing...
+	
+	Misc.WatchAndDeleteOldLogsFromDatabase()
+
 	// Keep thread alive
 
 	select {

@@ -1,9 +1,13 @@
 package Misc
 
 import (
+	"context"
 	"elucid503/SproutLoggingRelay/Types"
+	"fmt"
 	"slices"
+	"time"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
@@ -69,6 +73,29 @@ func SendToAllWebSockets(Message Types.Response) {
 	for _, WebSocket := range ConnectedWebSockets {
 
 		WebSocket.WriteJSON(Message)
+
+	}
+
+}
+
+func WatchAndDeleteOldLogsFromDatabase() {
+
+	// This will create a loop which runs every 5 minutes, and deletes logs older than 5 days from the database
+
+	for {
+
+		CurrentTime := time.Now()
+		FiveDaysAgo := CurrentTime.AddDate(0, 0, -5)
+
+		_, Err := Database.Collection("Logs").DeleteMany(context.Background(), bson.M{"created": bson.M{"$lt": FiveDaysAgo}})
+
+		if Err != nil {
+
+			fmt.Println("Error deleting old logs from database:", Err)
+
+		}
+
+		time.Sleep(5 * time.Minute)
 
 	}
 
