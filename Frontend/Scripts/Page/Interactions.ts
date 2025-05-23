@@ -308,8 +308,12 @@ const ContextMenuRouter = async (Event: JQuery.TriggeredEvent): Promise<void> =>
                 // check if the log has a seperator above, and if so, remove it
 
                 const Seperator = LogElement.prev(".ServiceLogsSeparator");
+                const LogToRemoveServiceUID = LogElement.attr("ServiceUID") || ""; 
+                const LogBelowServiceUID = LogElement.next(".InlineItem.Log").attr("ServiceUID") || ""; 
 
-                if (Seperator.length > 0) {
+                // if there's a seperator above and the log below is not of the same service, remove the seperator
+
+                if (Seperator.length > 0 && LogBelowServiceUID !== LogToRemoveServiceUID) {
 
                     Seperator.remove();
 
