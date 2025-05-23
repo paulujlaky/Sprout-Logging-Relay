@@ -287,6 +287,12 @@ func (Log *Log) ToHTML(RelatedService *Service) string {
 						%s
 
 					</div>
+
+					<div class="LogMetaActions">
+
+						<ion-icon name="ellipsis-horizontal"></ion-icon>
+
+					</div>
 				
 				</div>
 

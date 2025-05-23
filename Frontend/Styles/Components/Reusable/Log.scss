@@ -109,3 +109,50 @@
     }
 
 }
+
+.LogMetaActions {
+
+    position: relative;
+
+    @include FlexCenter();
+    
+    margin-left: $SpacingSmall;
+
+}
+
+.LogMetaActions::after {
+
+    content: '';
+
+    // More padding for better UX during taps 
+
+    padding: $SpacingSmall;
+
+    width: $SpacingSmall * 1.5;
+    height: $SpacingSmall * 1.5;
+
+    position: absolute;
+
+    top: 0; left: 0;
+
+    z-index: 1;
+
+}
+
+.LogMetaActions {
+
+    @include FlexCenter();
+    
+    margin-left: $SpacingSmall;
+    border-radius: $BorderRadiusSmall;
+
+    transition: all $TransitionTime;
+
+    &:hover {
+
+        cursor: pointer;
+        filter: brightness(1.05);
+
+    }
+
+}

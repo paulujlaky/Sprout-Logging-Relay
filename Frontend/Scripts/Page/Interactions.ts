@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { GlobalStorage } from '../Main';
 
 import type { Service } from '../Misc/Structs';
-import { Log, MakeRequest } from '../Misc/Utils';
+import { Log } from '../Misc/Utils';
 
 import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, DeleteLog, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
@@ -289,7 +289,7 @@ export function ResetPaginationState(): void {
 
 // Context Menu
 
-const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEventBase | JQuery.ContextMenuEvent): Promise<void> => {
+const ContextMenuRouter = async (Event: JQuery.TriggeredEvent): Promise<void> => {
 
     if (Event.type == "contextmenu") { Event.preventDefault(); } // Prevent default context menu
 
@@ -391,8 +391,6 @@ const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEven
         });
     }
 
-    
-
     ShowContextMenu(Event, SharedOptions);
 
 }
@@ -400,7 +398,18 @@ const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEven
 function HandleContextMenuInteractions(): void {
 
     RelevantElements.Document.on("contextmenu", ContextMenuRouter);
-    RelevantElements.Document.on("click", ContextMenuRouter);
+
+    RelevantElements.Document.on("click", (Event) => {
+
+        const Target = $(Event.target);
+
+        if (!Target.closest(".InlineItem.Log .LogMetaActions").length) { return; }
+
+        Event.stopPropagation(); // so that the context menu isn't hidden right away
+
+        ContextMenuRouter(Event); 
+        
+    });
 
 }
 

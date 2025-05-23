@@ -203,7 +203,7 @@ export interface ContextMenuOption {
 
 }
 
-export function ShowContextMenu(Event: JQuery.MouseEventBase | JQuery.TouchEventBase, Options: ContextMenuOption[]): void {
+export function ShowContextMenu(Event: JQuery.TriggeredEvent, Options: ContextMenuOption[]): void {
     
     // Populate Menu
 
@@ -273,7 +273,9 @@ export function ShowContextMenu(Event: JQuery.MouseEventBase | JQuery.TouchEvent
 
     $(document).one("click", (E) => {
 
-        if (!$(E.target).closest(".InlineFileActions").length) RelevantElements.CtxMenu.hide();
+        if ($(E.target).closest(".LogMetaActions").length) return; // dedicated area
+
+        RelevantElements.CtxMenu.hide();
 
     });
 
@@ -443,7 +445,7 @@ export async function InsertServiceSeparators(RawLogs: ServiceLog[]): Promise<st
 export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
 
     const LogsWithSeperators = await InsertServiceSeparators(RawLogs);
-    
+
     return LogsWithSeperators.join("");
 
 }
