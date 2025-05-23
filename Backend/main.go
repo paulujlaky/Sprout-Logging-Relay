@@ -122,7 +122,7 @@ func main() {
 
 	select {
 
-		case <-make(chan struct{}): 
+		case <- make(chan struct{}): 
 	
 		// Block forever
 

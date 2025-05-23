@@ -159,43 +159,49 @@ function WatchForCreateService(): void {
 
     RelevantElements.Buttons.CreateServiceBtn.on("click", async () => {
 
-        const Dialog = $(".CreateServiceDialog") as JQuery<HTMLDialogElement>;
-
-        ShowDialog(Dialog);
-
-        const DialogResponse = await WaitForDialogResponse(Dialog);
-
-        HideDialog(Dialog);
-
-        if (!DialogResponse) { return; } // if the user cancelled, return
-
-        const ServiceName = $("#ServiceName").val() as string; // get the service name from the input
-        const ServiceDescription = $("#ServiceDescription").val() as string; // get the service type from the select menu
-        const ServiceIconURL = $("#ServiceIconURL").val() as string; // get the service icon URL from the input
-
-        if (!ServiceName || !ServiceDescription || !ServiceIconURL) { // if any of the values are empty, return
-
-            ShowFooterMessage("Error", "Please complete all fields", 2_500); 
-
-            return; // early return
-
-        }
-
-        const CreateResponse = await CreateService(ServiceName, ServiceDescription, ServiceIconURL); // create the service
-
-        if (CreateResponse?.UID) {
-
-            ShowFooterMessage("Success", `Created service ${CreateResponse.Name} (UID ${CreateResponse.UID})`, 5_000); // show success message
-
-        } else {
-            
-            ShowFooterMessage("Error", "Failed to create service", 2_500); // show error message
-
-        }
-
-        PopulateServiceSelect(await GetAllServices()); // repopulate the service select menu
+        DisplayCreateServiceDialog();
 
     });
+
+}
+
+async function DisplayCreateServiceDialog(): Promise<void> {
+    
+    const Dialog = $(".CreateServiceDialog") as JQuery<HTMLDialogElement>;
+
+    ShowDialog(Dialog);
+
+    const DialogResponse = await WaitForDialogResponse(Dialog);
+
+    HideDialog(Dialog);
+
+    if (!DialogResponse) { return; } // if the user cancelled, return
+
+    const ServiceName = $("#ServiceName").val() as string; // get the service name from the input
+    const ServiceDescription = $("#ServiceDescription").val() as string; // get the service type from the select menu
+    const ServiceIconURL = $("#ServiceIconURL").val() as string; // get the service icon URL from the input
+
+    if (!ServiceName || !ServiceDescription || !ServiceIconURL) { // if any of the values are empty, return
+
+        ShowFooterMessage("Error", "Please complete all fields", 2_500);
+
+        return; // early return
+
+    }
+
+    const CreateResponse = await CreateService(ServiceName, ServiceDescription, ServiceIconURL); // create the service
+
+    if (CreateResponse?.UID) {
+
+        ShowFooterMessage("Success", `Created service ${CreateResponse.Name} (UID ${CreateResponse.UID})`, 5_000); // show success message
+
+    } else {
+            
+        ShowFooterMessage("Error", "Failed to create service", 2_500); // show error message
+
+    }
+
+    PopulateServiceSelect(await GetAllServices()); // repopulate the service select menu
 
 }
 
@@ -287,11 +293,71 @@ const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEven
 
     if (Event.type == "contextmenu") { Event.preventDefault(); } // Prevent default context menu
 
-    // TODO: will need to determine target and if apt to show context menu
-
-    return; // early return for now
+    const IsTargetLog = $(Event.target).closest(".InlineItem.Log").length > 0;
     
     const SharedOptions: ContextMenuOption[] = []
+
+    if (IsTargetLog) {
+
+        const LogElement = $(Event.target).closest(".InlineItem.Log");
+
+        SharedOptions.push({
+
+            Name: "Remove Log", Icon: "<ion-icon name='trash-outline'></ion-icon>", Action: async () => {
+
+                LogElement.remove(); // remove the log element. TODO: remove from backend too (needs some retrofits)
+
+            }
+ 
+        });
+
+        SharedOptions.push({
+
+            Name: "Copy Content", Icon: "<ion-icon name='copy-outline'></ion-icon>", Action: async () => {
+
+                const LogContent = LogElement.text().replace(/\s+/g, " ").trim(); // without extraneous spaces
+            
+                navigator.clipboard.writeText(LogContent).catch((Error) => {
+
+                    Log("Error", `Failed to copy log content: ${Error}`);
+                    ShowFooterMessage("Error", "Failed to copy log content", 2_500);
+
+                }).then(() => {
+
+                    ShowFooterMessage("Success", "Copied log content to clipboard", 2_500);
+                    
+                });
+        
+            }
+
+        });
+
+    } else {
+
+        SharedOptions.push({
+
+            Name: "Refresh", Icon: "<ion-icon name='refresh'></ion-icon>", Action: async () => {
+        
+                const Refreshed = await GetService(GlobalStorage.CurrentService?.UID || "All");
+
+                Refreshed && SwitchToService(Refreshed, true);
+
+            }
+
+        });
+
+        SharedOptions.push({
+
+            Name: "New Service", Icon: "<ion-icon name='add'></ion-icon>", Action: async () => {
+        
+                DisplayCreateServiceDialog();
+
+            }
+
+        });
+    }
+
+    
 
     ShowContextMenu(Event, SharedOptions);
 

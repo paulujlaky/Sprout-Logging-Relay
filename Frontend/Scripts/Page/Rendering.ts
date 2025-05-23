@@ -246,8 +246,8 @@ export function ShowContextMenu(Event: JQuery.MouseEventBase | JQuery.TouchEvent
 
     // Position Menu
 
-    const MenuX = Event.pageX || 0;
-    const MenuY = Event.pageY || 0;
+    const MenuX = (Event.pageX || 0);
+    const MenuY = (Event.pageY || 0);
 
     // Check for out of bounds
 
