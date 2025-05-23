@@ -17,6 +17,8 @@ import (
 
 type RouteInfo struct {
 
+	Path string
+
 	Method  string
 	Handler func(*gin.Context)
 
@@ -27,56 +29,88 @@ type RouteInfo struct {
 
 }
 
-func GetRoutes() map[string]RouteInfo {
+func GetRoutes() []RouteInfo {
 
-	return map[string]RouteInfo{
+	return []RouteInfo{
 
-		"/": {
+		{
 
+			Path:   "/",
 			Method:  "GET",
+
 			Handler: GlobalRoutes.Dash,
 
 			RateLimitConfig: nil,
+
 		},
 
-		"/API/": {
+		{
 
+			Path:   "/API/",
 			Method:  "GET",
-			Handler: APIRoutes.Index,
 
+			Handler: APIRoutes.Index,
 			RateLimitConfig: nil,
+
 		},
 
-		"/API/Auth/LogIn": {
-
+		{
+			Path:   "/API/Auth/LogIn",
 			Method:  "POST",
+
 			Handler: AuthRoutes.LogIn,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
 				MaxRequestsAllowed: 90,
 				TimeWindow:         60,
+
 			},
+
 		},
 
-		"/API/Auth/LogOut": {
-
+		{
+			Path:   "/API/Auth/LogOut",
 			Method:  "POST",
+
 			Handler: AuthRoutes.LogOut,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
 				MaxRequestsAllowed: 90,
 				TimeWindow:         60,
+
 			},
+
 		},
 
 		// General Log Routes 
 
-		"/API/Logs/Watch": {
+		{
 
+			Path:   "/API/Logs/Watch",
 			Method:  "GET",
+
 			Handler: ServiceRoutes.WatchLogs,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 90,
+				TimeWindow:         60,
+
+			},
+			Authorized: true,
+
+		},
+
+		// Log-Specific Routes 
+
+		{
+
+			Path:   "/API/Logs/:LogUID",
+			Method:  "GET",
+
+			Handler: LogRoutes.FetchLog,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
@@ -88,12 +122,32 @@ func GetRoutes() map[string]RouteInfo {
 			Authorized: true,
 
 		},
-				
+
+		{
+
+			Path:   "/API/Logs/:LogUID",
+			Method:  "DELETE",
+
+			Handler: LogRoutes.DeleteLog,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 90,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
 		// Service-Specific Log Routes
 
-		"/API/Services/:ServiceUID/Logs/Create": {
+		{
 
+			Path:   "/API/Services/:ServiceUID/Logs/Create",
 			Method:  "POST",
+
 			Handler: LogRoutes.CreateLog,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
@@ -103,13 +157,15 @@ func GetRoutes() map[string]RouteInfo {
 
 			},
 
-			Authorized:false, // services must be able to call this route programmatically
+			Authorized: false, // services must be able to call this route programmatically
 
 		},
 
-		"/API/Services/:ServiceUID/Logs/View": {
+		{
 
+			Path:   "/API/Services/:ServiceUID/Logs/View",
 			Method:  "GET",
+
 			Handler: ServiceRoutes.ViewServiceSpecificLogs,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
@@ -119,15 +175,17 @@ func GetRoutes() map[string]RouteInfo {
 
 			},
 
-			Authorized:false, // services must be able to call this route programmatically
+			Authorized: false, // services must be able to call this route programmatically
 
 		},
-		
-		// Services
-		
-		"/API/Services/Create": {
 
+		// Services
+
+		{
+
+			Path:   "/API/Services/Create",
 			Method:  "POST",
+
 			Handler: ServiceRoutes.CreateService,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
@@ -140,10 +198,12 @@ func GetRoutes() map[string]RouteInfo {
 			Authorized: true,
 
 		},
+		{
 
-		"/API/Services/List": {
 
+			Path:   "/API/Services/List",
 			Method:  "GET",
+
 			Handler: ServiceRoutes.GetServiceList,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
@@ -156,7 +216,7 @@ func GetRoutes() map[string]RouteInfo {
 			Authorized: true,
 
 		},
-		
+
 	}
 
 }

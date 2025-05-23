@@ -406,35 +406,45 @@ export async function AppendLogsOnTop(Logs: ServiceLog[]): Promise<void> {
 
 }
 
-export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
+/**
+ * Inserts service separators between logs from different services.
+ * Returns a new array of logs and separator HTML strings.
+ * 
+ */
 
-    const Result: string[] = []; // create an array to store the logs
+export async function InsertServiceSeparators(RawLogs: ServiceLog[]): Promise<string[]> {
 
-    // Add a "New Service" seperator between each group of logs from each service
+    const Result: string[] = [];
 
     for (let i = 0; i < RawLogs.length; i++) {
 
-        const Log = RawLogs[i]; // get the log
-
+        const Log = RawLogs[i];
         Log.HTML && Result.push(Log.HTML);
 
-        const NextLog = RawLogs[i + 1]; // get the next log
+        const NextLog = RawLogs[i + 1];
 
-        if (!NextLog) break; // done
+        if (!NextLog) break;
 
-        if (Log.ParentServiceUID != NextLog.ParentServiceUID) { // if the service UID is different
+        if (Log.ParentServiceUID != NextLog.ParentServiceUID) {
 
-            const NextService = await GetService(NextLog.ParentServiceUID); // get the next service
+            const NextService = await GetService(NextLog.ParentServiceUID);
 
-            const Seperator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`
+            const Separator = `<div class="ServiceLogsSeparator"><div class="Line"></div>${NextService?.Name}<div class="Line"></div></div>`;
+            Result.push(Separator);
 
-            Result.push(Seperator); // add the seperator to the result
-            
         }
 
     }
 
-    return Result.join(""); // join the logs and return the HTML
+    return Result;
+
+}
+
+export async function AddSeperatorsAndRenderLogs(RawLogs: ServiceLog[]): Promise<string> {
+
+    const LogsWithSeperators = await InsertServiceSeparators(RawLogs);
+    
+    return LogsWithSeperators.join("");
 
 }
 

@@ -60,6 +60,38 @@
 
     },
 
+    "GetLog": {
+
+        "Method": "GET",
+        "Path": "/API/Logs/:LogUID",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
+    "DeleteLog": {
+
+        "Method": "DELETE",
+        "Path": "/API/Logs/:LogUID",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 120,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
+    },
+
     "ViewServiceSpecificLogs": {
 
         "Method": "GET",

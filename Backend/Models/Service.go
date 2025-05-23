@@ -168,6 +168,7 @@ func (AssociatedService *Service) AddLog(Level LogLevel, Title string, RawConten
 
 	NewLog := Log{
 
+		UID: Functions.RandomString(16), 
 		ParentServiceUID: AssociatedService.UID, 
 
 		Level: Level,

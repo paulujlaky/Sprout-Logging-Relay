@@ -50,25 +50,25 @@ var RouteHandlers = Assets.GetRoutes()
 
 func LoadRoutes(Router *gin.Engine) {
 
-	for Route, Handler := range RouteHandlers {
+	for _, Route := range RouteHandlers {
 
 		MiddlewareFuncs := []gin.HandlerFunc{}
 
-		if Handler.Authorized {
+		if Route.Authorized {
 
 			MiddlewareFuncs = append(MiddlewareFuncs, Middleware.Authorize())
 
 		}
 
-		if Handler.RateLimitConfig != nil {
+		if Route.RateLimitConfig != nil {
 
-			MiddlewareFuncs = append(MiddlewareFuncs, Middleware.RateLimit(Handler.RateLimitConfig))
+			MiddlewareFuncs = append(MiddlewareFuncs, Middleware.RateLimit(Route.RateLimitConfig))
 
 		}
 
-		MiddlewareFuncs = append(MiddlewareFuncs, Handler.Handler) // Adding the real handler to the end of the middleware chain
+		MiddlewareFuncs = append(MiddlewareFuncs, Route.Handler) // Adding the real handler to the end of the middleware chain
 
-		Router.Handle(Handler.Method, Route, MiddlewareFuncs...)
+		Router.Handle(Route.Method, Route.Path, MiddlewareFuncs...)
 
 	}
 

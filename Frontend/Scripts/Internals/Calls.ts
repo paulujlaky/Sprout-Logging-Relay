@@ -99,6 +99,36 @@ export async function GetService(ServiceUID: string): Promise<Service | null> {
 
 // Logs
 
+export async function GetLog(LogUID: string): Promise<ServiceLog | null> {
+
+    const Response = await MakeRequest(Routes.GetLog, null, {}, { LogUID: LogUID });
+
+    if (!Response || !Response.JSON) {
+
+        Log("Error", "Failed to get log from backend.");
+        return null;
+
+    }
+
+    return Response.JSON as ServiceLog; 
+
+}
+
+export async function DeleteLog(LogUID: string): Promise<boolean> {
+
+    const Response = await MakeRequest(Routes.DeleteLog, null, {}, { LogUID: LogUID });
+
+    if (!Response || !Response.JSON?.Success) {
+
+        Log("Error", "Failed to delete log from backend.");
+        return false;
+
+    }
+
+    return true;
+
+}
+
 export async function GetServiceLogs(ServiceUID: string, Offset: number = 0, Limit: number = 25): Promise<ServiceLog[]> {
 
     // Get all logs for a service

@@ -3,10 +3,10 @@ import $ from 'jquery';
 import { GlobalStorage } from '../Main';
 
 import type { Service } from '../Misc/Structs';
-import { Log } from '../Misc/Utils';
+import { Log, MakeRequest } from '../Misc/Utils';
 
 import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
-import { CreateService, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
+import { CreateService, DeleteLog, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
 
 const RelevantElements = {
 
@@ -305,7 +305,41 @@ const ContextMenuRouter = async (Event: JQuery.MouseEventBase | JQuery.TouchEven
 
             Name: "Remove Log", Icon: "<ion-icon name='trash-outline'></ion-icon>", Action: async () => {
 
-                LogElement.remove(); // remove the log element. TODO: remove from backend too (needs some retrofits)
+                // check if the log has a seperator above, and if so, remove it
+
+                const Seperator = LogElement.prev(".ServiceLogsSeparator");
+
+                if (Seperator.length > 0) {
+
+                    Seperator.remove();
+
+                }
+
+                LogElement.remove(); // and now we remove the log element from the page
+
+                const LogUID = LogElement.attr("UID") || ""; // get the log UID from the element
+
+                if (!LogUID) {
+
+                    // This is an old version of the log which does not contain a UID. We can't do much here
+
+                    ShowFooterMessage("Error", "Log is outdated; unable to permanently remove", 2_500);
+
+                    return;
+
+                }
+
+                const WasSuccess = await DeleteLog(LogUID);
+
+                if (WasSuccess) {
+
+                    ShowFooterMessage("Success", "Log removed", 2_500);
+
+                } else {
+
+                    ShowFooterMessage("Error", "Failed to remove log", 2_500);
+
+                }
 
             }
  

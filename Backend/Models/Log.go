@@ -123,6 +123,8 @@ type LogContent struct {
 
 type Log struct {
 
+	UID string `json:"UID"` // Only in logs past v1.0
+
 	ParentServiceUID string `json:"ParentServiceUID"`
 
 	Level LogLevel `json:"Level"`
@@ -246,7 +248,7 @@ func (Log *Log) ToHTML(RelatedService *Service) string {
 
 	return fmt.Sprintf(`
 
-	<div class="InlineItem Log %s" ServiceUID="%s">
+	<div class="InlineItem Log %s" ServiceUID="%s" UID="%s">
 
 		<div class="LogMeta">
 
@@ -304,7 +306,7 @@ func (Log *Log) ToHTML(RelatedService *Service) string {
 
 		</div>
 
-	</div>`, StringLevel, RelatedService.UID, RelatedService.Name, StringLevel, 
+	</div>`, StringLevel, RelatedService.UID, Log.UID, RelatedService.Name, StringLevel, 
 	
 	time.Unix(Log.Created, 0).Format("Jan 2, 2006"), 
 	time.Unix(Log.Created, 0).Format("3:04 PM"),
