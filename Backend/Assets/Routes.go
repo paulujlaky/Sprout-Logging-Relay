@@ -150,6 +150,8 @@ func GetRoutes() []RouteInfo {
 
 			Handler: LogRoutes.CreateLog,
 
+			RateLimitConfig: nil,
+
 			Authorized: false, // services must be able to call this route programmatically
 
 		},
