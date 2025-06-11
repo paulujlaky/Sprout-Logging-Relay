@@ -150,13 +150,6 @@ func GetRoutes() []RouteInfo {
 
 			Handler: LogRoutes.CreateLog,
 
-			RateLimitConfig: &Middleware.RouteRateLimitConfig{
-
-				MaxRequestsAllowed: 120,
-				TimeWindow:         60,
-
-			},
-
 			Authorized: false, // services must be able to call this route programmatically
 
 		},
