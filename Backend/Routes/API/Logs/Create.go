@@ -144,10 +144,10 @@ func CreateLog(GinContext *gin.Context) {
 
 			NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, gin.H{
 
-				"ParentServiceUID": Service.UID,
-				"Level":            Models.LogLevelError,
+				"parentserviceuid": Service.UID,
+				"level":            Models.LogLevelError,
 
-				"Created": gin.H{
+				"created": gin.H{
 
 					"$gte": NewLog.Created - int64(Service.Notifications.Interval),
 
@@ -159,7 +159,7 @@ func CreateLog(GinContext *gin.Context) {
 
 			if NumberOfErrors >= int64(Service.Notifications.Threshold) {
 
-				// the service is currently shitting itself 
+				// the service is currently not doing good 
 
 				AllNotificationSubscriptions, ErrorGettingSubscriptions := Models.GetAllSubscriptions();
 
@@ -167,13 +167,15 @@ func CreateLog(GinContext *gin.Context) {
 				
 				for _, Subscription := range AllNotificationSubscriptions {
 
-					if (time.Now().Unix() - Subscription.LastNotifSent) < int64(Service.Notifications.Interval) {
+					if (time.Now().Unix() - Subscription.LastNotifSent) < 300 {
 						
-						return // we have already sent a notification in the last n seconds, so we will not send another one
+						return // we have already sent a notification in the last 5 minutes, no need to send another one
 
 					}
 
 					// Send notification to subscription
+
+
 
 					
 

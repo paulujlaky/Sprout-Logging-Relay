@@ -17,7 +17,7 @@ type ServiceNotificationSettings struct {
 	// example: 25/60 = 25 errors in 60 seconds to trigger a notification
 
 	Threshold int `json:"Threshold"` // number of errors before triggering a notification
-	Interval  int `json:"Interval"`  // interval where the threshold is reset (in
+	Interval  int `json:"Interval"`  // interval where the threshold is reset (in seconds)
 
 }
 

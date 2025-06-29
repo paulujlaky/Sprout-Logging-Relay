@@ -4,6 +4,7 @@ import (
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,8 +15,6 @@ func Add(GinContext *gin.Context) {
 	GinContext.BindJSON(&Body)
 
 	Subscription := Body["Subscription"]
-	Key := Body["Key"]
-	PublicKey := Body["PublicKey"]
 
 	if Subscription == nil {
 
@@ -39,11 +38,8 @@ func Add(GinContext *gin.Context) {
 
 		LastNotifSent: 0, // nothing sent yet
 
-		Details: Subscription.(gin.H),
+		Subscription: Subscription.(webpush.Subscription),
 		
-		Key: Key.(string),
-		PublicKey: PublicKey.(string),
-
 	}
 
 	Err := SubscriptionInstance.Save()

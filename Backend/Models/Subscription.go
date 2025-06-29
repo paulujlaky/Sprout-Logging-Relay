@@ -3,8 +3,10 @@ package Models
 import (
 	"context"
 	"elucid503/SproutLoggingRelay/Misc"
+	"encoding/json"
 	"time"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,11 +14,8 @@ type Subscription struct {
 
 	LastNotifSent int64 `json:"LastNotifSent"` // timestamp of the last notification sent
 
-	Details gin.H `json:"Details"`
+	Subscription webpush.Subscription `json:"Subscription"`
 	
-	Key string `json:"Key"`
-	PublicKey string `json:"PublicKey"`
-
 }
 
 // Retrievers 
@@ -59,7 +58,7 @@ func GetAllSubscriptions() ([]*Subscription, error) {
 
 func (Associated *Subscription) Save() error {
 
-	// Save the subscription to the database
+	// Saves the subscription to the database
 
 	_, Err := Misc.Database.Collection("Subscriptions").InsertOne(context.TODO(), Associated)
 
@@ -73,9 +72,73 @@ func (Associated *Subscription) Save() error {
 
 }
 
-func (Associated *Subscription) SendNotification() error {
+func (Associated *Subscription) Delete() error {
 
-	// now, we must request the Details.endpoint with 
+	// Deletes the subscription from the database
+
+	_, Err := Misc.Database.Collection("Subscriptions").DeleteOne(context.TODO(), gin.H{
+		"subscription": Associated.Subscription,
+	})
+
+	if Err != nil {
+
+		return Err
+		
+	}
+
+	return nil
+
+}
+
+func (Associated *Subscription) SendNotification(Title string, Body string, Silent bool, Navigate string) error {
+
+	payload := map[string]interface{}{
+
+		"web_push": 8030,
+
+		"notification": map[string]interface{}{
+
+			"title":   Title,
+			"body":    Body,
+			"silent":  Silent,
+			"navigate": Navigate,
+
+		},
+
+	}
+
+	SerializedNotificationBody, ErrorSerializing := json.Marshal(payload)
+
+	if ErrorSerializing != nil {
+
+		return ErrorSerializing
+
+	}
+
+	Response, NotificationSendError := webpush.SendNotification(SerializedNotificationBody, &Associated.Subscription, &webpush.Options{
+
+		Topic: "Logs",
+		TTL: 60, // 1 minute
+
+		VAPIDPublicKey: Misc.Config.WebPush.PublicKey,
+		VAPIDPrivateKey: Misc.Config.WebPush.PrivateKey,
+		Subscriber: "mailto:notifications@sprout.software",
+
+	});
+
+	if Response != nil && (Response.StatusCode == 404 || Response.StatusCode == 410) {
+
+		// we can delete in this case
+
+		return Associated.Delete() 
+		
+	}
+
+	if NotificationSendError != nil {
+
+		return NotificationSendError // failed to send notification
+
+	}
 
 	// we should also the last notification time
 

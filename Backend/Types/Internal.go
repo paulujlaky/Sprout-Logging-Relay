@@ -1,28 +1,24 @@
 package Types
 
 type Config struct {
-
 	GinMode string
 
 	Server struct {
+		Port int
+	}
 
-		Port int 
-
+	WebPush struct {
+		PublicKey  string
+		PrivateKey string
 	}
 
 	Database struct {
-
-		URI string 
-		Name string 
-
+		URI  string
+		Name string
 	}
 
 	Versions struct {
-
-		Server string
+		Server   string
 		Frontend string
-
 	}
-
 }
-

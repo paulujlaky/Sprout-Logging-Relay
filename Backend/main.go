@@ -78,6 +78,8 @@ func main() {
 
 	Config, Error := LoadConfig()
 
+	Misc.Config = Config; // for use in other packages
+
 	if Error != nil {
 
 		panic(Error) // Can't continue

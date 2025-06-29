@@ -90,7 +90,14 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
 async function PromptUserForNotifications(): Promise<void> {
 
-    const Manager = new window.PushManager()
+    const Manager = ("pushManager" in window ? window.pushManager : "PushManager" in window ? new window.PushManager() : null) as PushManager | null;
+
+    if (!Manager) {
+
+        Log("Error", "Declarative Notifications are not supported in this browser");
+        return
+
+    } 
 
     const ExistingSubscription = await Manager.getSubscription().catch(() => null);
 
@@ -132,8 +139,6 @@ async function PromptUserForNotifications(): Promise<void> {
     const Response = await MakeRequest(Routes.AddSubscription, {
 
         Subscription: JSON.stringify(Subscription), // stringify the subscription object
-        Key: Subscription.getKey("auth"),
-        PublicKey: Subscription.getKey("p256dh"),
 
     }).catch(() => null);
 

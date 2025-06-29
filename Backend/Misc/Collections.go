@@ -21,6 +21,8 @@ var Database *mongo.Database
 
 var ConnectedWebSockets []*websocket.Conn
 
+var Config *Types.Config
+
 // Database
 
 func ConnectToDb(Config *Types.Config) error {
