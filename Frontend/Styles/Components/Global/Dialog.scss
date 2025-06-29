@@ -149,3 +149,15 @@ Dialog {
     text-align: center;
 
 }
+
+// Create Service Dialog 
+
+.CreateServiceNotificationButtons {
+
+    width: 100%;
+    justify-content: space-between!important;
+    padding: 0;
+
+    gap: $SpacingMedium;
+
+}
