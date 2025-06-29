@@ -3,10 +3,12 @@ import $ from 'jquery';
 import { GlobalStorage } from '../Main';
 
 import type { Service } from '../Misc/Structs';
-import { Log } from '../Misc/Utils';
+import { Log, MakeRequest } from '../Misc/Utils';
 
 import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, DeleteLog, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
+
+import Routes from "../../Routes.json";
 
 const RelevantElements = {
 
@@ -79,6 +81,74 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
     WatchForLogViewScroll(); // Watch for scroll events on the log view
+
+    PromptUserForNotifications();
+
+}
+
+// Notifications
+
+async function PromptUserForNotifications(): Promise<void> {
+
+    const Manager = new window.PushManager()
+
+    const ExistingSubscription = await Manager.getSubscription().catch(() => null);
+
+    if (ExistingSubscription) { 
+
+        Log("Info", "User already has a notification subscription");
+        return;
+
+    }
+
+    const Permission = await Notification.requestPermission().catch(() => "denied");
+
+    if (Permission != "granted") { 
+
+        Log("Info", "User denied notification permission");
+        return;
+
+    }
+
+    Log("Info", "User granted notification permission; subscribing...");
+
+    const Subscription = await Manager.subscribe({
+
+        userVisibleOnly: true,
+
+    }).catch((Error) => {
+
+        Log("Error", `Failed to subscribe user to notifications: ${Error}`);
+        ShowFooterMessage("Error", "Failed to subscribe to notifications", 2_500);
+
+        return null;
+
+    });
+
+    if (!Subscription) { return; }
+
+    // We must now send to the server the subscription details so it can send notifications to the user
+
+    const Response = await MakeRequest(Routes.AddSubscription, {
+
+        Subscription: JSON.stringify(Subscription), // stringify the subscription object
+        Key: Subscription.getKey("auth"),
+        PublicKey: Subscription.getKey("p256dh"),
+
+    }).catch(() => null);
+
+    if (!Response || !Response.JSON?.Success) {
+
+        // Once again, we show error
+
+        Log("Error", "Failed to subscribe user to notifications");
+        ShowFooterMessage("Error", "Failed to subscribe to notifications", 2_500);
+
+        return;
+
+    }
+
+    Log("Info", "User subscribed to notifications successfully");
 
 }
 
@@ -179,9 +249,12 @@ async function DisplayCreateServiceDialog(): Promise<void> {
 
     const ServiceName = $("#ServiceName").val() as string; // get the service name from the input
     const ServiceDescription = $("#ServiceDescription").val() as string; // get the service type from the select menu
+    const ServiceNotificationThreshold = parseInt($("#ServiceNotificationThreshold").val() as string); 
+    const ServiceNotificationInterval = parseInt($("#ServiceNotificationInterval").val() as string); 
+    
     const ServiceIconURL = $("#ServiceIconURL").val() as string; // get the service icon URL from the input
 
-    if (!ServiceName || !ServiceDescription || !ServiceIconURL) { // if any of the values are empty, return
+    if (!ServiceName || !ServiceDescription || !ServiceIconURL || isNaN(ServiceNotificationThreshold) || isNaN(ServiceNotificationInterval)) {
 
         ShowFooterMessage("Error", "Please complete all fields", 2_500);
 
@@ -189,7 +262,7 @@ async function DisplayCreateServiceDialog(): Promise<void> {
 
     }
 
-    const CreateResponse = await CreateService(ServiceName, ServiceDescription, ServiceIconURL); // create the service
+    const CreateResponse = await CreateService(ServiceName, ServiceDescription, ServiceIconURL, ServiceNotificationThreshold, ServiceNotificationInterval);
 
     if (CreateResponse?.UID) {
 

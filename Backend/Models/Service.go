@@ -12,6 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+type ServiceNotificationSettings struct {
+
+	// example: 25/60 = 25 errors in 60 seconds to trigger a notification
+
+	Threshold int `json:"Threshold"` // number of errors before triggering a notification
+	Interval  int `json:"Interval"`  // interval where the threshold is reset (in
+
+}
+
 type Service struct {
 
 	UID string `json:"UID"`
@@ -19,6 +28,8 @@ type Service struct {
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
 	Icon        string `json:"Icon"`
+
+	Notifications ServiceNotificationSettings `json:"Notifications"`
 
 	// Internals 
 
@@ -28,7 +39,7 @@ type Service struct {
 
 // Creator 
 
-func NewService(Name string, Description string, Icon string) Service {
+func NewService(Name string, Description string, Icon string, ErrorThreshold int, ErrorInterval int) Service {
 
 	// Generate UID
 
@@ -40,6 +51,13 @@ func NewService(Name string, Description string, Icon string) Service {
 		Name:        Name,
 		Description: Description,
 		Icon:        Icon,
+
+		Notifications: ServiceNotificationSettings{
+
+			Threshold: ErrorThreshold,
+			Interval:  ErrorInterval, 
+
+		},
 
 		MaxLogs:     250, // default max logs to keep before overwriting. eventually might be configurable by user
 

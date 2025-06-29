@@ -6,6 +6,7 @@ import (
 	"elucid503/SproutLoggingRelay/Types"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -127,6 +128,69 @@ func CreateLog(GinContext *gin.Context) {
 				"Log": NewLog,
 			},
 		})
+
+		// Now we must check if it was 
+		// a. an error
+		// b. if there was more than n errors in the last m seconds (as determined by the linked services's notification settings)
+		// this takes some database reads... so we will only check it if it is an error log 
+
+		if ParsedLevel == int(Models.LogLevelError) {
+
+			// good to go 
+
+			if Service.Notifications.Threshold <= 0 || Service.Notifications.Interval <= 0 { return }
+
+			// Get the number of errors in the last n seconds, including this one 
+
+			NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, gin.H{
+
+				"ParentServiceUID": Service.UID,
+				"Level":            Models.LogLevelError,
+
+				"Created": gin.H{
+
+					"$gte": NewLog.Created - int64(Service.Notifications.Interval),
+
+				},
+
+			})
+
+			if CountError != nil { return } // not ideal.
+
+			if NumberOfErrors >= int64(Service.Notifications.Threshold) {
+
+				// the service is currently shitting itself 
+
+				AllNotificationSubscriptions, ErrorGettingSubscriptions := Models.GetAllSubscriptions();
+
+				if ErrorGettingSubscriptions == nil { return }
+				
+				for _, Subscription := range AllNotificationSubscriptions {
+
+					if (time.Now().Unix() - Subscription.LastNotifSent) < int64(Service.Notifications.Interval) {
+						
+						return // we have already sent a notification in the last n seconds, so we will not send another one
+
+					}
+
+					// Send notification to subscription
+
+					
+
+				}
+
+
+
+			}
+
+
+			
+
+
+				
+
+
+		}
 
 	}
 

@@ -10,11 +10,11 @@ import Routes from "../../Routes.json";
 
 // Services
 
-export async function CreateService(ServiceName: string, ServiceDescription: string, ServiceIconURL: string): Promise<Service | null> {
+export async function CreateService(ServiceName: string, ServiceDescription: string, ServiceIconURL: string, NotificationThreshold: number, NotificationInterval: number): Promise<Service | null> {
 
     // Create a service with the given name, description, and icon URL
 
-    const Response = await MakeRequest(Routes.CreateService, { Name: ServiceName, Description: ServiceDescription, Icon: ServiceIconURL });
+    const Response = await MakeRequest(Routes.CreateService, { Name: ServiceName, Description: ServiceDescription, Icon: ServiceIconURL, Threshold: NotificationThreshold, Interval: NotificationInterval });
 
     if (!Response || !Response.JSON) {
 

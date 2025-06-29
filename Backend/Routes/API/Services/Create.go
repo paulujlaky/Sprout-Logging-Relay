@@ -33,10 +33,24 @@ func CreateService(GinContext *gin.Context) {
 	Name := Body["Name"].(string)
 	Description := Body["Description"].(string)
 	Icon := Body["Icon"].(string)
+	Threshold := Body["Threshold"].(int)
+	Interval := Body["Interval"].(int)
+
+	if Threshold <= 0 || Interval <= 0 {
+
+		GinContext.JSON(400, gin.H{
+
+			"Message": "Threshold and Interval must provided and be positive integers",
+
+		})
+
+		return
+
+	}
 
 	// Create service
 
-	Service := Models.NewService(Name, Description, Icon)
+	Service := Models.NewService(Name, Description, Icon, Threshold, Interval)
 
 	GinContext.JSON(200, gin.H{
 

@@ -154,6 +154,22 @@
 
         "Authorized": true
 
+    }, 
+
+    "AddSubscription": {
+
+       "Method": "POST",
+        "Path": "/API/Subscriptions/Add",
+
+        "RateLimitConfig": {
+
+            "MaxRequestsAllowed": 180,
+            "TimeWindow": 60
+
+        },
+
+        "Authorized": true
+
     }
 
 }

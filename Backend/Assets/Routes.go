@@ -12,6 +12,8 @@ import (
 	LogRoutes "elucid503/SproutLoggingRelay/Routes/API/Logs"
 	ServiceRoutes "elucid503/SproutLoggingRelay/Routes/API/Services"
 
+	SubscriptionRoutes "elucid503/SproutLoggingRelay/Routes/API/Subscriptions"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -200,6 +202,27 @@ func GetRoutes() []RouteInfo {
 			Method:  "GET",
 
 			Handler: ServiceRoutes.GetServiceList,
+
+			RateLimitConfig: &Middleware.RouteRateLimitConfig{
+
+				MaxRequestsAllowed: 180,
+				TimeWindow:         60,
+
+			},
+
+			Authorized: true,
+
+		},
+
+		// Other 
+
+		{
+
+
+			Path:   "/API/Subscriptions/Add",
+			Method:  "POST",
+
+			Handler: SubscriptionRoutes.Add,
 
 			RateLimitConfig: &Middleware.RouteRateLimitConfig{
 
