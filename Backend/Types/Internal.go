@@ -8,6 +8,8 @@ type Config struct {
 	}
 
 	WebPush struct {
+		NotificationTimeout int
+
 		PublicKey  string
 		PrivateKey string
 	}

@@ -5,6 +5,7 @@ import (
 	"elucid503/SproutLoggingRelay/Misc"
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
+
 	"fmt"
 	"strconv"
 	"time"
@@ -173,7 +174,7 @@ func CreateLog(GinContext *gin.Context) {
 		
 		for _, Subscription := range AllNotificationSubscriptions {
 
-			if (time.Now().Unix() - Subscription.LastNotifSent) < 10 { return } // we have already sent a notification in the last 5 minutes, no need to send another one
+			if (time.Now().Unix() - Subscription.LastNotifSent) < int64(Misc.Config.WebPush.NotificationTimeout) { return }
 
 			// Send notification to subscription
 
