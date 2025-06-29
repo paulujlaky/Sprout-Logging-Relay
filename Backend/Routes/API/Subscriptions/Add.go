@@ -3,6 +3,7 @@ package Routes
 import (
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
+	"encoding/json"
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func Add(GinContext *gin.Context) {
 
 	GinContext.BindJSON(&Body)
 
-	Subscription := Body["Subscription"]
+	Subscription := Body["Subscription"] // string JSON of webpush.Subscription
 
 	if Subscription == nil {
 
@@ -34,17 +35,38 @@ func Add(GinContext *gin.Context) {
 
 	}
 
+	// we must convert the Subscription to a webpush.Subscription type
+
+	ConvertedSubscription := webpush.Subscription{}
+
+	ParsingErr := json.Unmarshal([]byte(Subscription.(string)), &ConvertedSubscription)
+
+	if ParsingErr != nil {
+
+		GinContext.JSON(400, Types.Response{
+
+			Message: "Invalid Subscription format",
+			JSON: gin.H{
+
+				"Success": false,
+
+			},
+
+		})
+
+	}
+
 	SubscriptionInstance := Models.Subscription{
 
 		LastNotifSent: 0, // nothing sent yet
 
-		Subscription: Subscription.(webpush.Subscription),
+		Subscription: ConvertedSubscription, // convert to webpush.Subscription type
 		
 	}
 
-	Err := SubscriptionInstance.Save()
+	SaveErr := SubscriptionInstance.Save()
 
-	if Err != nil {
+	if SaveErr != nil {
 
 		GinContext.JSON(500, Types.Response{
 

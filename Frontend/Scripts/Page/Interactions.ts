@@ -3,9 +3,9 @@ import $ from 'jquery';
 import { GlobalStorage } from '../Main';
 
 import type { Service } from '../Misc/Structs';
-import { Log, MakeRequest } from '../Misc/Utils';
+import { Log, MakeRequest, URLBase64ToUint8Array } from '../Misc/Utils';
 
-import { AppendLogsOnTop, HideDialog, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
+import { AppendLogsOnTop, HideDialog, ModifyIfStandalone, PopulateServiceSelect, ShowContextMenu, ShowDialog, ShowFooterMessage, SwitchToService, UpdateUIWithService, WaitForDialogResponse, type ContextMenuOption } from './Rendering';
 import { CreateService, DeleteLog, GetAllServices, GetService, GetServiceLogs } from '../Internals/Calls';
 
 import Routes from "../../Routes.json";
@@ -21,6 +21,8 @@ const RelevantElements = {
         ReloadBtn: $("#RefreshButton"),
 
         CreateServiceBtn: $("#CreateService"),
+
+        Notifications: $("#Notifications")
 
     },
 
@@ -64,6 +66,7 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
 
     // Watchers
 
+    ModifyIfStandalone();
     HandleToggleClicks();
 
     HandleSelectMenuInteractions();
@@ -82,78 +85,117 @@ export async function WatchPageInteractions(AllServices: Service[]): Promise<voi
     WatchForServiceSwitches(); // Must be after PopulateServiceSelect to ensure the select menu is populated
     WatchForLogViewScroll(); // Watch for scroll events on the log view
 
-    PromptUserForNotifications();
+    WatchNotificationsButton();
 
 }
 
 // Notifications
 
-async function PromptUserForNotifications(): Promise<void> {
+async function WatchNotificationsButton(): Promise<void> {
+    
+    const UpdateButtonState = (Subscribed: boolean): void => {
 
-    const Manager = ("pushManager" in window ? window.pushManager : "PushManager" in window ? new window.PushManager() : null) as PushManager | null;
+        RelevantElements.Buttons.Notifications.html(`<ion-icon name="notifications${Subscribed ? "-off" : ""}-outline"></ion-icon>`)
+
+    }
+
+    const Manager = ("pushManager" in window ? window.pushManager : null) as PushManager | null;
 
     if (!Manager) {
 
-        Log("Error", "Declarative Notifications are not supported in this browser");
-        return
-
-    } 
-
-    const ExistingSubscription = await Manager.getSubscription().catch(() => null);
-
-    if (ExistingSubscription) { 
-
-        Log("Info", "User already has a notification subscription");
-        return;
+        Log("Warning", "Declarative Notifications are not supported in this browser");
+        // Continuing to respond buttons with error 
 
     }
 
-    const Permission = await Notification.requestPermission().catch(() => "denied");
+    const ExistingSubscription = await Manager?.getSubscription().catch(() => null);
 
-    if (Permission != "granted") { 
+    if (ExistingSubscription) { UpdateButtonState(true); }
 
-        Log("Info", "User denied notification permission");
-        return;
+    // Update button on startup if existing subscription
 
-    }
+    RelevantElements.Buttons.Notifications.on("click", async () => {
 
-    Log("Info", "User granted notification permission; subscribing...");
+        if (!Manager) { return ShowFooterMessage("Error", "Not supported in this browser", 5_000); }
 
-    const Subscription = await Manager.subscribe({
+        if (ExistingSubscription) {
 
-        userVisibleOnly: true,
+            // Time to unsubscribe
 
-    }).catch((Error) => {
+            Log("Info", "User already subscribed to notifications; unsubscribing...");
 
-        Log("Error", `Failed to subscribe user to notifications: ${Error}`);
-        ShowFooterMessage("Error", "Failed to subscribe to notifications", 2_500);
+            const Unsubscribe = await ExistingSubscription.unsubscribe().catch(() => null);
 
-        return null;
+            if (!Unsubscribe) {
 
+                Log("Error", "Failed to unsubscribe user from notifications");
+                return ShowFooterMessage("Error", "Failed to unsubscribe from notifications", 5_000);
+
+            }
+
+            ShowFooterMessage("Success", "Unsubscribed from notifications", 5_000);
+            return UpdateButtonState(false); // Update button state to unsubscribed
+            
+        }
+
+        const Permission = await Notification.requestPermission().catch((Err) => {
+        
+            Log("Error", `Failed to request notification permission: ${Err}`);
+            return "denied"; // Return denied if there was an error
+
+        });
+
+        if (Permission != "granted") {
+
+            Log("Warning", "User denied notification permission");
+            ShowFooterMessage("Info", "You must allow notifications to subscribe", 5_000);
+
+            return;
+
+        }
+
+        Log("Info", "User granted notification permission; subscribing...");
+
+        const Subscription = await Manager.subscribe({
+
+            userVisibleOnly: true,
+            applicationServerKey: URLBase64ToUint8Array("BFRFkpMRMigxP6ZduqCSEoouQwl42EOfFuqehcB-DHw2fs-ehaZRskzimsTq2er59nSaS3ZHMlFBd0jN5yO0gIc") // This is the public VAPID key for the server. Could be put in a config file but fine for now
+
+        }).catch((Error) => {
+
+            Log("Error", `Failed to subscribe user to notifications: ${Error}`);
+            ShowFooterMessage("Error", `Failed to subscribe to notifications: ${Error?.message || "Unknown Error"}`, 5_000);
+
+            return null;
+
+        });
+
+        if (!Subscription) { return; }
+
+        // We must now send to the server the subscription details so it can send notifications to the user
+
+        const Response = await MakeRequest(Routes.AddSubscription, {
+
+            Subscription: JSON.stringify(Subscription), // stringify the subscription object
+
+        }).catch(() => null);
+
+        if (!Response || !Response.JSON?.Success) {
+
+            // Once again, we show error
+
+            Log("Error", "Failed to subscribe user to notifications");
+            ShowFooterMessage("Error", `Failed to subscribe to notifications: ${Response?.JSON?.Message || "Unknown Error"}`, 5_000);
+
+            return;
+
+        }
+
+        Log("Info", "User subscribed to notifications successfully");
+        ShowFooterMessage("Success", "Subscribed to notifications", 5_000);
+        UpdateButtonState(true); 
+        
     });
-
-    if (!Subscription) { return; }
-
-    // We must now send to the server the subscription details so it can send notifications to the user
-
-    const Response = await MakeRequest(Routes.AddSubscription, {
-
-        Subscription: JSON.stringify(Subscription), // stringify the subscription object
-
-    }).catch(() => null);
-
-    if (!Response || !Response.JSON?.Success) {
-
-        // Once again, we show error
-
-        Log("Error", "Failed to subscribe user to notifications");
-        ShowFooterMessage("Error", "Failed to subscribe to notifications", 2_500);
-
-        return;
-
-    }
-
-    Log("Info", "User subscribed to notifications successfully");
 
 }
 

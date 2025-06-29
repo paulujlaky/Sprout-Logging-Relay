@@ -1,6 +1,7 @@
 package Routes
 
 import (
+	"elucid503/SproutLoggingRelay/Functions"
 	"elucid503/SproutLoggingRelay/Misc"
 	"elucid503/SproutLoggingRelay/Models"
 	"elucid503/SproutLoggingRelay/Types"
@@ -110,23 +111,33 @@ func CreateLog(GinContext *gin.Context) {
 
 		})
 
-	} else {
+		return;
 
-		GinContext.JSON(200, Types.Response{
+	}
 
-			Message: "Log added successfully",
+	GinContext.JSON(200, Types.Response{
 
-		})
-		
+		Message: "Log added successfully",
+
+	})
+	
+	// Extra stuff which runs concurrently
+
+	go func() {
+
 		// In this case, we also should send to all websockets waiting for logs that this log was created 
-		
+
 		Misc.SendToAllWebSockets(Types.Response{
 			
 			Message: "New log created",
+
 			JSON: gin.H{
+				
 				"ServiceUID": Service.UID,
 				"Log": NewLog,
+
 			},
+
 		})
 
 		// Now we must check if it was 
@@ -134,66 +145,44 @@ func CreateLog(GinContext *gin.Context) {
 		// b. if there was more than n errors in the last m seconds (as determined by the linked services's notification settings)
 		// this takes some database reads... so we will only check it if it is an error log 
 
-		if ParsedLevel == int(Models.LogLevelError) {
+		if ParsedLevel != int(Models.LogLevelError) { return } // not an error
+		if Service.Notifications.Threshold <= 0 || Service.Notifications.Interval <= 0 { return } // not configured to notify
 
-			// good to go 
+		// Get the number of errors in the last n seconds, including this one 
 
-			if Service.Notifications.Threshold <= 0 || Service.Notifications.Interval <= 0 { return }
+		NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, gin.H{
 
-			// Get the number of errors in the last n seconds, including this one 
+			"parentserviceuid": Service.UID,
+			"level":            Models.LogLevelError,
 
-			NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, gin.H{
+			"created": gin.H{
 
-				"parentserviceuid": Service.UID,
-				"level":            Models.LogLevelError,
+				"$gte": NewLog.Created - int64(Service.Notifications.Interval),
 
-				"created": gin.H{
+			},
 
-					"$gte": NewLog.Created - int64(Service.Notifications.Interval),
+		})
 
-				},
+		if CountError != nil { return } // not ideal.
+		if (NumberOfErrors) < int64(Service.Notifications.Threshold) { return } // not enough
 
-			})
+		// the service is currently not doing good 
 
-			if CountError != nil { return } // not ideal.
+		AllNotificationSubscriptions, ErrorGettingSubscriptions := Models.GetAllSubscriptions();
+		if ErrorGettingSubscriptions != nil { return }
+		
+		for _, Subscription := range AllNotificationSubscriptions {
 
-			if NumberOfErrors >= int64(Service.Notifications.Threshold) {
+			if (time.Now().Unix() - Subscription.LastNotifSent) < 10 { return } // we have already sent a notification in the last 5 minutes, no need to send another one
 
-				// the service is currently not doing good 
+			// Send notification to subscription
 
-				AllNotificationSubscriptions, ErrorGettingSubscriptions := Models.GetAllSubscriptions();
+			ErrorSending := Subscription.SendNotification(Service.Name, fmt.Sprintf("Potential issue detected, with %d %s in the last %d seconds. Open for more details.", NumberOfErrors, Functions.PluralizeString(int(NumberOfErrors), "error"), Service.Notifications.Interval), false, fmt.Sprintf("https://relay.sprout.software?Service=%s", Service.UID))
 
-				if ErrorGettingSubscriptions == nil { return }
-				
-				for _, Subscription := range AllNotificationSubscriptions {
-
-					if (time.Now().Unix() - Subscription.LastNotifSent) < 300 {
-						
-						return // we have already sent a notification in the last 5 minutes, no need to send another one
-
-					}
-
-					// Send notification to subscription
-
-
-
-					
-
-				}
-
-
-
-			}
-
-
-			
-
-
-				
-
+			if ErrorSending != nil { fmt.Println("Error sending notification:", ErrorSending) }
 
 		}
-
-	}
+			
+	}()
 
 }

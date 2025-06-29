@@ -158,7 +158,7 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
     const BindListeners = (WebSocketInstance: WebSocket) => {
 
         WebSocketInstance.onopen = () => Log("Info", "Connected to logs websocket.");
-        WebSocketInstance.onclose = () => Log("Error", "Disconnected from logs websocket.");
+        WebSocketInstance.onclose = () => Log("Warning", "Disconnected from logs websocket.");
         WebSocketInstance.onerror = () => Log("Error", "Error in logs websocket.");
 
         WebSocketInstance.onmessage = (MsgEvent: MessageEvent) => {
@@ -223,7 +223,7 @@ export async function WatchForLogs(NewLogCallback: (ServiceUID: string, Log: Ser
 
         if (WebSocketInst.readyState == WebSocket.CLOSED) {
 
-            Log("Error", "Detected disconnection from logs websocket. Attempting to reconnect.");
+            Log("Warning", "Detected disconnection from logs websocket. Attempting to reconnect.");
 
             WebSocketInst = new WebSocket(WatchLogsRouteURL); // Recreate the websocket instance
 

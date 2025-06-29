@@ -6,7 +6,7 @@ import { AppendLogToUI, HideLoadingView, SwitchToService } from "./Page/Renderin
 import { IsNearBottom, WatchPageInteractions } from "./Page/Interactions";
 
 import { GetAllServices, GetService, WatchForLogs } from "./Internals/Calls";
-import { Log } from "./Misc/Utils";
+import { GetURLParameter, Log } from "./Misc/Utils";
 
 export const GlobalStorage: Storage = {
 
@@ -56,7 +56,7 @@ if (IsAuthed) {
 
     WatchPageInteractions(AllServices); // Watch for page interactions
 
-    const ConglomorateService = await GetService("All"); // Get all services with logs
+    const ConglomorateService = await GetService(GetURLParameter("Service") || "All"); // Get all services with logs or the service specified in the URL
 
     Log("Info", "All services loaded... rendering.");
 

@@ -93,11 +93,11 @@ func WatchAndDeleteOldLogsFromDatabase() {
 
 		if Err != nil {
 
-			fmt.Println("Error deleting old logs from database:", Err)
+			fmt.Println("[CLEANUP] Error deleting old logs from database:", Err)
 
 		} else {
 
-			fmt.Println("Deleted old logs from database")
+			fmt.Println("[CLEANUP] Deleted old logs from database")
 
 		}
 

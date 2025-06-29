@@ -8,6 +8,7 @@ import (
 
 	"github.com/SherClockHolmes/webpush-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Subscription struct {
@@ -60,7 +61,12 @@ func (Associated *Subscription) Save() error {
 
 	// Saves the subscription to the database
 
-	_, Err := Misc.Database.Collection("Subscriptions").InsertOne(context.TODO(), Associated)
+	Filter := gin.H{"subscription": Associated.Subscription}
+	ToSet := gin.H{"$set": Associated}
+
+	Options := options.UpdateOne().SetUpsert(true) 
+
+	_, Err := Misc.Database.Collection("Subscriptions").UpdateOne(context.TODO(), Filter, ToSet, Options)
 
 	if Err != nil {
 
@@ -109,11 +115,7 @@ func (Associated *Subscription) SendNotification(Title string, Body string, Sile
 
 	SerializedNotificationBody, ErrorSerializing := json.Marshal(payload)
 
-	if ErrorSerializing != nil {
-
-		return ErrorSerializing
-
-	}
+	if ErrorSerializing != nil { return ErrorSerializing }
 
 	Response, NotificationSendError := webpush.SendNotification(SerializedNotificationBody, &Associated.Subscription, &webpush.Options{
 
@@ -122,25 +124,19 @@ func (Associated *Subscription) SendNotification(Title string, Body string, Sile
 
 		VAPIDPublicKey: Misc.Config.WebPush.PublicKey,
 		VAPIDPrivateKey: Misc.Config.WebPush.PrivateKey,
-		Subscriber: "mailto:notifications@sprout.software",
+		Subscriber: "https://relay.sprout.software",
 
 	});
 
 	if Response != nil && (Response.StatusCode == 404 || Response.StatusCode == 410) {
 
-		// we can delete in this case
-
-		return Associated.Delete() 
+		return Associated.Delete() // subscription is no longer valid
 		
 	}
 
-	if NotificationSendError != nil {
+	if NotificationSendError != nil { return NotificationSendError }
 
-		return NotificationSendError // failed to send notification
-
-	}
-
-	// we should also the last notification time
+	// updating the time
 
 	Associated.LastNotifSent = time.Now().Unix()
 	return Associated.Save()

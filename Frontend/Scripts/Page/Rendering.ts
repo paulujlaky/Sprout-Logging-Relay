@@ -41,6 +41,9 @@ const RelevantElements = {
         Start: $(".Container.ServiceLogsStart"),
         Logs: $(".Container.ServiceLogsContent"),
 
+        Header: $(".Container.DashHeader"),
+        Footer: $(".Container.DashFooter")
+
     },
 
     States: {
@@ -112,6 +115,32 @@ export function ShowFooterMessage(Mode: "Success" | "Info" | "Error", Message: s
         }, HideTimeout)
 
     };
+
+}
+
+export function ModifyIfStandalone(): void {
+
+    if ("standalone" in window.navigator && window.navigator.standalone) {
+
+        // Footer gets bigger... (home bar)
+
+        RelevantElements.Containers.Footer[0].style.height = "6rem";
+        RelevantElements.Containers.Footer[0].style.paddingBottom = "15px";
+
+        // consequently, padding bottom on the logs content gets bigger
+
+        document.body.style.paddingBottom = "1rem";
+
+        // and header doesn't have backdrop as to not conflict with status bar
+
+        RelevantElements.Containers.Header[0].style.backdropFilter = "none";
+        RelevantElements.Containers.Header[0].style.backgroundColor = "#141414";
+
+        RelevantElements.Containers.Header[0].style.paddingTop = "0";
+        RelevantElements.Containers.Header[0].style.paddingBottom = "10px";
+        RelevantElements.Containers.Header[0].style.height = "4rem";
+
+    }
 
 }
 

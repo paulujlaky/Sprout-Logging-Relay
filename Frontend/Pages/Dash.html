@@ -4,14 +4,18 @@
 <head>
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0 viewport-fit=cover">
+
   <title>Sprout Logging Relay</title>
   <link rel="icon" href="/Assets/Logos/Sprout.ico" type="image/x-icon">
 
   <!-- Apple/Mobile Embedded App Meta -->
 
   <link rel="apple-touch-icon" href="/Assets/Logos/AppIcon.png" type="image/png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#141414">
 
   <meta name="apple-mobile-web-app-title" content="Sprout Logs">
   
@@ -168,7 +172,7 @@
       <div class="Container Transparent HorizontalFlex LoggingViewControlButtons">
 
         <Button class="ServiceLogControlButton" id="RefreshButton"><span class="ButtonLabel">Reload</span> <ion-icon name="refresh"></ion-icon></Button>
-        <a href="https://sprout.software/Status" target="_blank"><Button class="ServiceLogControlButton"><span class="ButtonLabel">Service Status</span> <ion-icon name="open-outline"></ion-icon></Button></a>
+        <Button class="ServiceLogControlButton" id="Notifications"><span class="ButtonLabel">Notify</span> <ion-icon name="notifications-outline"></ion-icon></Button>
 
       </div>
 

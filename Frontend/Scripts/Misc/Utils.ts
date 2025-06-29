@@ -140,3 +140,15 @@ export function PluralizeWord(Count: number, Singular: string, Plural: string): 
     return `${Count == 1 ? Singular : Plural}`;
 
 }
+
+// Crypto
+
+export function URLBase64ToUint8Array(Base64String: string): Uint8Array {
+
+    const Padding = "=".repeat((4 - Base64String.length % 4) % 4);
+  
+    const B64 = (Base64String + Padding).replace(/\-/g, "+").replace(/_/g, "/");
+
+    return Uint8Array.from([...atob(B64)].map(char => char.charCodeAt(0)));
+    
+}
