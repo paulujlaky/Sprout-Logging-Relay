@@ -142,32 +142,28 @@ func CreateLog(GinContext *gin.Context) {
 		})
 
 		// Now we must check if it was 
-		// a. an error
-		// b. if there was more than n errors in the last m seconds (as determined by the linked services's notification settings)
+		// a. an error (or warning... warnings count as 0.5 of an error)
+		// b. if there was more than n problems in the last m seconds (as determined by the linked services's notification settings)
 		// this takes some database reads... so we will only check it if it is an error log 
 
 		if ParsedLevel != int(Models.LogLevelError) { return } // not an error
 		if Service.Notifications.Threshold <= 0 || Service.Notifications.Interval <= 0 { return } // not configured to notify
 
-		// Get the number of errors in the last n seconds, including this one 
+		// Get the number of errors and warnings in the last n seconds, including this one
 
-		NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, gin.H{
+		ErrorCountFilter := gin.H{ "parentserviceuid": Service.UID, "level": Models.LogLevelError, "created": gin.H{ "$gte": NewLog.Created - int64(Service.Notifications.Interval), }, }
+		WarningCountFilter := gin.H{ "parentserviceuid": Service.UID, "level": Models.LogLevelWarning, "created": gin.H{ "$gte": NewLog.Created - int64(Service.Notifications.Interval), }, }
 
-			"parentserviceuid": Service.UID,
-			"level":            Models.LogLevelError,
+		NumberOfErrors, CountError := Misc.Database.Collection("Logs").CountDocuments(GinContext, ErrorCountFilter)
+		NumberOfWarnings, CountWarning := Misc.Database.Collection("Logs").CountDocuments(GinContext, WarningCountFilter)
 
-			"created": gin.H{
+		if CountError != nil || CountWarning != nil { return } // not ideal.
 
-				"$gte": NewLog.Created - int64(Service.Notifications.Interval),
+		WeightedErrorCount := float64(NumberOfErrors) + float64(NumberOfWarnings) * 0.5 // Warnings count as 0.5 of an error
 
-			},
+		if WeightedErrorCount < float64(Service.Notifications.Threshold) { return } // not enough
 
-		})
-
-		if CountError != nil { return } // not ideal.
-		if (NumberOfErrors) < int64(Service.Notifications.Threshold) { return } // not enough
-
-		// the service is currently not doing good 
+		// the service is currently not doing good
 
 		AllNotificationSubscriptions, ErrorGettingSubscriptions := Models.GetAllSubscriptions();
 		if ErrorGettingSubscriptions != nil { return }
@@ -176,9 +172,9 @@ func CreateLog(GinContext *gin.Context) {
 
 			if (time.Now().Unix() - Subscription.LastNotifSent) < int64(Misc.Config.WebPush.NotificationTimeout) { return }
 
-			// Send notification to subscription
+			NotificationMsg := fmt.Sprintf( "Potential issue detected: %d %s and %d %s in the last %d seconds. Open for more details.", NumberOfErrors, Functions.PluralizeString(int(NumberOfErrors), "error"), NumberOfWarnings, Functions.PluralizeString(int(NumberOfWarnings), "warning"), Service.Notifications.Interval)
 
-			ErrorSending := Subscription.SendNotification(Service.Name, fmt.Sprintf("Potential issue detected, with %d %s in the last %d seconds. Open for more details.", NumberOfErrors, Functions.PluralizeString(int(NumberOfErrors), "error"), Service.Notifications.Interval), false, fmt.Sprintf("https://relay.sprout.software?Service=%s", Service.UID))
+			ErrorSending := Subscription.SendNotification(Service.Name, NotificationMsg, false, fmt.Sprintf("https://relay.sprout.software?Service=%s", Service.UID))
 
 			if ErrorSending != nil { fmt.Println("Error sending notification:", ErrorSending) }
 
