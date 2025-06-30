@@ -146,7 +146,7 @@ func CreateLog(GinContext *gin.Context) {
 		// b. if there was more than n problems in the last m seconds (as determined by the linked services's notification settings)
 		// this takes some database reads... so we will only check it if it is an error log 
 
-		if ParsedLevel != int(Models.LogLevelError) { return } // not an error
+		if ParsedLevel == int(Models.LogLevelInfo) { return } // not a problem
 		if Service.Notifications.Threshold <= 0 || Service.Notifications.Interval <= 0 { return } // not configured to notify
 
 		// Get the number of errors and warnings in the last n seconds, including this one
