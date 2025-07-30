@@ -98,7 +98,7 @@ async function WatchNotificationsButton(): Promise<void> {
         RelevantElements.Buttons.Notifications.html(`<ion-icon name="notifications${Subscribed ? "-off" : ""}-outline"></ion-icon>`)
 
     }
-
+ 
     const Manager = ("pushManager" in window ? window.pushManager : null) as PushManager | null;
 
     if (!Manager) {

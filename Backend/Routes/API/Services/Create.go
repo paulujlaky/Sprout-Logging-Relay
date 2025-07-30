@@ -33,8 +33,8 @@ func CreateService(GinContext *gin.Context) {
 	Name := Body["Name"].(string)
 	Description := Body["Description"].(string)
 	Icon := Body["Icon"].(string)
-	Threshold := Body["Threshold"].(int)
-	Interval := Body["Interval"].(int)
+	Threshold := int(Body["Threshold"].(float64))
+	Interval := int(Body["Interval"].(float64))
 
 	if Threshold <= 0 || Interval <= 0 {
 
