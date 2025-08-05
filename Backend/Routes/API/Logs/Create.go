@@ -116,6 +116,9 @@ func CreateLog(GinContext *gin.Context) {
 
 	}
 
+	GinContext.Header("Access-Control-Allow-Origin", "*") // Allows CORS for this endpoint
+	GinContext.Header("Access-Control-Allow-Methods", "POST, OPTIONS") // Allows POST
+
 	GinContext.JSON(200, Types.Response{
 
 		Message: "Log added successfully",
